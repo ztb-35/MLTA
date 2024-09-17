@@ -70,9 +70,10 @@ Notably, we show that time series analysis (e.g., forecasting) can be cast as ye
 </p>
 
 ## Requirements
-Use python 3.11 from MiniConda
+Use python 3.9
 
-- torch==2.2.2
+- torch==2.3.0
+- pytorch-cuda==12.1
 - accelerate==0.28.0
 - einops==0.7.0
 - matplotlib==3.7.0
@@ -85,6 +86,8 @@ Use python 3.11 from MiniConda
 - transformers==4.31.0
 - deepspeed==0.14.0
 - sentencepiece==0.2.0
+- omegaconf==2.3.0
+- seaborn==0.13.2
 
 To install all dependencies:
 ```
