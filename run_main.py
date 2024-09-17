@@ -3,7 +3,6 @@ import gc
 import sys
 
 import torch
-from accelerate import Accelerator, DeepSpeedPlugin
 from accelerate import DistributedDataParallelKwargs
 from matplotlib import pyplot as plt
 from torch import nn, optim
@@ -141,9 +140,7 @@ parser.add_argument('--equal', type=int, default=1, help='1: equal sampling, 0: 
 args = parser.parse_args()
 
 args = parser.parse_args()
-ddp_kwargs = DistributedDataParallelKwargs(find_unused_parameters=True)
-deepspeed_plugin = DeepSpeedPlugin(hf_ds_config='./ds_config_zero2.json')
-accelerator = Accelerator(kwargs_handlers=[ddp_kwargs], deepspeed_plugin=deepspeed_plugin)
+
 print(args)
 mses = []
 maes = []
@@ -545,7 +542,7 @@ elif args.output_attn_map:
             num_attn_map = {'attn_seasonal': attn_map_list[0], 'attn_trend': attn_map_list[1], 'attn_residual': attn_map_list[2]}
 
         for k, v in num_attn_map.items():
-            accelerator.print("v in num_attn_map.items(): ", str(k))
+            print("v in num_attn_map.items(): ", str(k))
             attn_heads_fused = v.mean(axis=1).mean(axis=0)
             # Create a heatmap
             plt.figure(figsize=(4, 20))  # Increase figure width to better display all columns
