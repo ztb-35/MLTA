@@ -4,10 +4,10 @@
 #SBATCH -p gpu
 #SBATCH -n 64#one GPU, n<16
 #SBATCH -A hpc_sunsmic3m
-#SBATCH -o /project/tzhao3/Time-LLM-main/job/etth1_out_2 # File name for stdout
-#SBATCH -e /project/tzhao3/Time-LLM-main/job/etth1_error_2 # File name for error
+#SBATCH -o /project/msun/xchen87/timellm_log/etth1_out_2 # File name for stdout
+#SBATCH -e /project/msun/xchen87/timellm_log/etth1_error_2 # File name for error
 #SBATCH --mail-type END # Send email when job ends
-#SBATCH --mail-user tzhao3@lsu.edu # Send mail to this address
+#SBATCH --mail-user xchen87@lsu.edu # Send mail to this address
 #SBATCH --gres=gpu:4
 #job on super mike3, xiaobing job script for baseline TimeLLM on ETTm2
 
