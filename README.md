@@ -88,6 +88,7 @@ Use python 3.9
 - sentencepiece==0.2.0
 - omegaconf==2.3.0
 - seaborn==0.13.2
+- statsmodels=0.14.2
 
 To install all dependencies:
 ```
