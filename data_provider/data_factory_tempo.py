@@ -10,6 +10,9 @@ data_dict = {
     'ECL': Dataset_Custom,
     'Traffic': Dataset_Custom,
     'Weather': Dataset_Custom,
+    'ILL': Dataset_Custom,
+    'Electricity': Dataset_Custom,
+    'Exchange': Dataset_Custom,
     'm4': Dataset_M4,
 }
 
@@ -55,7 +58,8 @@ def data_provider(args, flag):
             timeenc=timeenc,
             freq=freq,
             percent=percent,
-            output_attn_map=args.output_attn_map
+            output_attn_map=args.output_attn_map,
+            data_name=args.data_name
         )
     data_loader = DataLoader(
         data_set,
