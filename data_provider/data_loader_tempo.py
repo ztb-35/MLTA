@@ -192,7 +192,7 @@ class Dataset_ETT_minute(Dataset):
     def __init__(self, root_path, flag='train', size=None,
                  features='S', data_path='ETTm1.csv',
                  target='OT', scale=True, timeenc=0, freq='t',
-                 percent=100, max_len=-1, data_name='ettm2', train_all=False):
+                 percent=100, max_len=-1, data_name='ettm2', train_all=False, output_attn_map=False):
         # size [seq_len, label_len, pred_len]
         # info
         if size == None:
@@ -214,7 +214,7 @@ class Dataset_ETT_minute(Dataset):
         self.timeenc = timeenc
         self.freq = freq
         self.percent = percent
-
+        self.output_attn_map = output_attn_map
         self.root_path = root_path
         self.data_path = data_path
         self.data_name = data_name
@@ -360,7 +360,7 @@ class Dataset_Custom(Dataset):
     def __init__(self, root_path, flag='train', size=None,
                  features='S', data_path='ETTh1.csv',
                  target='OT', scale=True, timeenc=0, freq='h',
-                 percent=10, data_name='weather', max_len=-1, train_all=False):
+                 percent=10, data_name='weather', max_len=-1, train_all=False, output_attn_map=False):
         # size [seq_len, label_len, pred_len]
         # info
         if size == None:
@@ -382,7 +382,7 @@ class Dataset_Custom(Dataset):
         self.timeenc = timeenc
         self.freq = freq
         self.percent = percent
-
+        self.output_attn_map = output_attn_map
         self.root_path = root_path
         self.data_path = data_path
         self.data_name = data_name
@@ -542,7 +542,7 @@ class Dataset_Pred(Dataset):
     def __init__(self, root_path, flag='pred', size=None,
                  features='S', data_path='ETTh1.csv',
                  target='OT', scale=True, inverse=False, timeenc=0, freq='15min', cols=None,
-                 percent=None, train_all=False):
+                 percent=None, train_all=False, output_attn_map=False):
         # size [seq_len, label_len, pred_len]
         # info
         if size == None:
@@ -649,7 +649,7 @@ class Dataset_TSF(Dataset):
     def __init__(self, root_path, flag='train', size=None,
                  features='S', data_path=None,
                  target='OT', scale=True, timeenc=0, freq='Daily',
-                 percent=10, max_len=-1, train_all=False):
+                 percent=10, max_len=-1, train_all=False, output_attn_map=False):
 
         self.train_all = train_all
 
