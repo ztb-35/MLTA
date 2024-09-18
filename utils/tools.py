@@ -81,7 +81,7 @@ class EarlyStopping:
                     f'Validation loss decreased ({self.val_loss_min:.6f} --> {val_loss:.6f}).  Saving model ...')
 
         if self.accelerator is not None:
-            accelerator.wait_for_everyone()
+            #accelerator.wait_for_everyone()
             accelerator.print("here we go")
             model = self.accelerator.unwrap_model(model)
             torch.save(model.state_dict(), path + '/' + 'checkpoint')
@@ -141,7 +141,7 @@ def del_files(dir_path):
     shutil.rmtree(dir_path)
 
 
-def vali(args, accelerator, model, vali_data, vali_loader, criterion,mae_metric):
+def vali(args, device, model, vali_data, vali_loader, criterion, mae_metric):
     total_loss = []
     total_mae_loss = []
     model.eval()
@@ -149,17 +149,15 @@ def vali(args, accelerator, model, vali_data, vali_loader, criterion,mae_metric)
         for i, data in tqdm(enumerate(vali_loader)):
             batch_x, batch_y, batch_x_mark, batch_y_mark, seq_trend, seq_seasonal, seq_resid = data[0], data[1], data[
                 2], data[3], data[4], data[5], data[6]
-            batch_x = batch_x.float().to(accelerator.device)
+            batch_x = batch_x.float().to(device)
             batch_y = batch_y.float()
-            batch_x_mark = batch_x_mark.float().to(accelerator.device)
-            batch_y_mark = batch_y_mark.float().to(accelerator.device)
-            seq_trend = seq_trend.float().to(accelerator.device)
-            seq_seasonal = seq_seasonal.float().to(accelerator.device)
-            seq_resid = seq_resid.float().to(accelerator.device)
+            batch_x_mark = batch_x_mark.float().to(device)
+            batch_y_mark = batch_y_mark.float().to(device)
+
             outputs = model(batch_x, batch_x_mark, batch_y, batch_y_mark, seq_trend, seq_seasonal, seq_resid)
             # encoder - decoder
             outputs = outputs[:, -args.pred_len:, :]
-            batch_y = batch_y[:, -args.pred_len:, :].to(accelerator.device)
+            batch_y = batch_y[:, -args.pred_len:, :].to(device)
             pred = outputs.detach().cpu()
             true = batch_y.detach().cpu()
             loss = criterion(pred, true)
@@ -171,6 +169,48 @@ def vali(args, accelerator, model, vali_data, vali_loader, criterion,mae_metric)
         total_loss = np.average(total_loss)
         model.train()
     return total_loss, total_mae_loss
+
+# def vali(args, accelerator, model, vali_data, vali_loader, criterion, mae_metric):
+#     total_loss = []
+#     total_mae_loss = []
+#     model.eval()
+#     with torch.no_grad():
+#         for i, (batch_x, batch_y, batch_x_mark, batch_y_mark) in tqdm(enumerate(vali_loader)):
+#             batch_x = batch_x.float().to(accelerator.device)
+#             batch_y = batch_y.float()
+#
+#             batch_x_mark = batch_x_mark.float().to(accelerator.device)
+#             batch_y_mark = batch_y_mark.float().to(accelerator.device)
+#
+#             # decoder input
+#             dec_inp = torch.zeros_like(batch_y[:, -args.pred_len:, :]).float()
+#             dec_inp = torch.cat([batch_y[:, :args.label_len, :], dec_inp], dim=1).float().to(
+#                 accelerator.device)
+#             # encoder - decoder
+#
+#             outputs = model(batch_x, batch_x_mark, dec_inp, batch_y_mark)
+#
+#             outputs, batch_y = accelerator.gather_for_metrics((outputs, batch_y))
+#
+#             f_dim = -1 if args.features == 'MS' else 0
+#             outputs = outputs[:, -args.pred_len:, f_dim:]
+#             batch_y = batch_y[:, -args.pred_len:, f_dim:].to(accelerator.device)
+#
+#             pred = outputs.detach()
+#             true = batch_y.detach()
+#
+#             loss = criterion(pred, true)
+#
+#             mae_loss = mae_metric(pred, true)
+#
+#             total_loss.append(loss.item())
+#             total_mae_loss.append(mae_loss.item())
+#
+#     total_loss = np.average(total_loss)
+#     total_mae_loss = np.average(total_mae_loss)
+#
+#     model.train()
+#     return total_loss, total_mae_loss
 
 def test(args, accelerator, model, train_loader, vali_loader, criterion):
     x, _ = train_loader.dataset.last_insample_window()
