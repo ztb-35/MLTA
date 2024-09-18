@@ -4,44 +4,44 @@
 #SBATCH -p gpu
 #SBATCH -n 64#one GPU, n<16
 #SBATCH -A hpc_sunsmic3m
-#SBATCH -o /project/tzhao3/Time-LLM-main/job/etth1_out_2 # File name for stdout
-#SBATCH -e /project/tzhao3/Time-LLM-main/job/etth1_error_2 # File name for error
+#SBATCH -o /project/tzhao3/TimeLLM_git_clone/Reprogramming-multi-level-time-series-forecasting-by-LLMs/job/etth1_out_2 # File name for stdout
+#SBATCH -e /project/tzhao3/TimeLLM_git_clone/Reprogramming-multi-level-time-series-forecasting-by-LLMs/job/etth1_error_2 # File name for error
 #SBATCH --mail-type END # Send email when job ends
 #SBATCH --mail-user tzhao3@lsu.edu # Send mail to this address
 #SBATCH --gres=gpu:4
 #job on super mike3
 
-model_name=TimeLLM
-train_epochs=50
+model_name=ST_TimeLLM_1
+train_epochs=1
 seq_len=512
 learning_rate=0.0001
 patience=10
 llama_layers=6
 num_process=4
-batch_size=16
+batch_size=48
+eval_batch_size=48
 d_model=32
 d_ff=128
 n_heads=8
-percent=100
-decomp_level=1
-comment='3'
+percent=2
+decomp_level=3
+decomp_method='STL'
+comment='2'
 
 
-for pred_len in 96
-do
-
-accelerate launch --multi_gpu --mixed_precision bf16 --num_processes $num_process  run_main_1.py \
+accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
   --task_name long_term_forecast \
   --is_training 1 \
   --root_path ./dataset/ETT-small/ \
   --data_path ETTh1.csv \
-  --model_id ETTh1_512_96 \
+  --model_id ETTm2_512_96 \
   --model $model_name \
-  --data ETTh1 \
+  --datasets ETTm1 \
+  --target_data ETTm1 \
   --features M \
-  --seq_len $seq_len \
+  --seq_len 512 \
   --label_len 48 \
-  --pred_len $pred_len \
+  --pred_len 96 \
   --factor 3 \
   --enc_in 7 \
   --dec_in 7 \
@@ -55,13 +55,14 @@ accelerate launch --multi_gpu --mixed_precision bf16 --num_processes $num_proces
   --n_heads $n_heads \
   --patience $patience \
   --batch_size $batch_size \
+  --eval_batch_size $eval_batch_size \
   --learning_rate $learning_rate \
   --llm_layers $llama_layers \
   --lradj 'COS' \
   --train_epochs $train_epochs \
   --percent $percent \
+  --align_text \
   --decomp_level $decomp_level \
-  --output_attn_map \
+  --decomp_method $decomp_method \
+  --combination 'late' \
   --model_comment $comment
-
-  done
