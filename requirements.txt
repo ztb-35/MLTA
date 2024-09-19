@@ -1,5 +1,4 @@
 torch==2.3.0
-pytorch-cuda==12.1
 accelerate==0.28.0
 einops==0.7.0
 matplotlib==3.7.0
