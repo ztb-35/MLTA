@@ -127,7 +127,7 @@ for ii in range(args.itr):
         args.task_name,
         args.model_id,
         args.model,
-        args.data,
+        args.target_data,
         args.features,
         args.seq_len,
         args.label_len,

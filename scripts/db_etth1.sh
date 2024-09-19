@@ -24,7 +24,7 @@ d_model=32
 d_ff=128
 n_heads=8
 percent=100
-decomp_level=3
+decomp_level=1
 decomp_method='STL'
 comment='2'
 
