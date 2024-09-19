@@ -73,7 +73,6 @@ Notably, we show that time series analysis (e.g., forecasting) can be cast as ye
 Use python 3.9
 
 - torch==2.3.0
-- pytorch-cuda==12.1
 - accelerate==0.28.0
 - einops==0.7.0
 - matplotlib==3.7.0
