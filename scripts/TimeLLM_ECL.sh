@@ -1,108 +1,181 @@
-model_name=TimeLLM
-train_epochs=10
-learning_rate=0.01
-llama_layers=32
+#!/bin/bash
+#SBATCH -N 1
+#SBATCH -t 72:00:00
+#SBATCH -p gpu
+#SBATCH -n 64#one GPU, n<16
+#SBATCH -A hpc_sunsmic3m
+#SBATCH -o /project/tzhao3/TimeLLM_git_clone/Reprogramming-multi-level-time-series-forecasting-by-LLMs/job/ECL_out_1 # File name for stdout
+#SBATCH -e /project/tzhao3/TimeLLM_git_clone/Reprogramming-multi-level-time-series-forecasting-by-LLMs/job/ECL_error_1 # File name for error
+#SBATCH --mail-type END # Send email when job ends
+#SBATCH --mail-user tzhao3@lsu.edu # Send mail to this address
+#SBATCH --gres=gpu:4
+#job on super mike3
 
-master_port=00097
-num_process=8
-batch_size=24
-d_model=16
-d_ff=32
+model_name=ST_TimeLLM_1
+train_epochs=50
+seq_len=512
+learning_rate=0.0001
+patience=3
+llama_layers=6
+num_process=4
+batch_size=48
+eval_batch_size=48
+d_model=32
+d_ff=128
+n_heads=8
+percent=100
+decomp_level=3
+decomp_method='STL'
+comment='1'
 
-comment='TimeLLM-ECL'
-
-accelerate launch --multi_gpu --mixed_precision bf16 --num_processes $num_process --main_process_port $master_port run_main.py \
+accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
   --task_name long_term_forecast \
   --is_training 1 \
-  --root_path ./dataset/electricity/ \
-  --data_path electricity.csv \
-  --model_id ECL_512_96 \
+  --root_path ./dataset/ETT-small/ \
+  --data_path ETTh1.csv \
+  --model_id ECL_512 \
   --model $model_name \
-  --data ECL \
+  --datasets electricity \
+  --target_data electricity \
   --features M \
-  --seq_len 512 \
+  --seq_len $seq_len \
   --label_len 48 \
   --pred_len 96 \
-  --e_layers 2 \
-  --d_layers 1 \
   --factor 3 \
-  --enc_in 321 \
-  --dec_in 321 \
-  --c_out 321 \
+  --enc_in 7 \
+  --dec_in 7 \
+  --c_out 7 \
+  --des 'Exp' \
+  --itr 1 \
+  --d_model $d_model \
+  --llm_model GPT2 \
+  --llm_dim 768 \
+  --d_ff $d_ff \
+  --n_heads $n_heads \
+  --patience $patience \
   --batch_size $batch_size \
+  --eval_batch_size $eval_batch_size \
   --learning_rate $learning_rate \
   --llm_layers $llama_layers \
+  --lradj 'COS' \
   --train_epochs $train_epochs \
+  --percent $percent \
+  --align_text \
+  --decomp_level $decomp_level \
+  --decomp_method $decomp_method \
+  --combination 'late' \
   --model_comment $comment
 
-accelerate launch --multi_gpu --mixed_precision bf16 --num_processes $num_process --main_process_port $master_port run_main.py \
+accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
   --task_name long_term_forecast \
   --is_training 1 \
-  --root_path ./dataset/electricity/ \
-  --data_path electricity.csv \
-  --model_id ECL_512_192 \
+  --root_path ./dataset/ETT-small/ \
+  --data_path ETTh1.csv \
+  --model_id ECL_512 \
   --model $model_name \
-  --data ECL \
+  --datasets electricity \
+  --target_data electricity \
   --features M \
-  --seq_len 512 \
+  --seq_len $seq_len \
   --label_len 48 \
   --pred_len 192 \
-  --e_layers 2 \
-  --d_layers 1 \
   --factor 3 \
-  --enc_in 321 \
-  --dec_in 321 \
-  --c_out 321 \
+  --enc_in 7 \
+  --dec_in 7 \
+  --c_out 7 \
+  --des 'Exp' \
+  --itr 1 \
+  --d_model $d_model \
+  --llm_model GPT2 \
+  --llm_dim 768 \
+  --d_ff $d_ff \
+  --n_heads $n_heads \
+  --patience $patience \
   --batch_size $batch_size \
+  --eval_batch_size $eval_batch_size \
   --learning_rate $learning_rate \
   --llm_layers $llama_layers \
+  --lradj 'COS' \
   --train_epochs $train_epochs \
+  --percent $percent \
+  --align_text \
+  --decomp_level $decomp_level \
+  --decomp_method $decomp_method \
+  --combination 'late' \
   --model_comment $comment
 
-  accelerate launch --multi_gpu --mixed_precision bf16 --num_processes $num_process --main_process_port $master_port run_main.py \
+accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
   --task_name long_term_forecast \
   --is_training 1 \
-  --root_path ./dataset/electricity/ \
-  --data_path electricity.csv \
-  --model_id ECL_512_336 \
+  --root_path ./dataset/ETT-small/ \
+  --data_path ETTh1.csv \
+  --model_id ECL_512 \
   --model $model_name \
-  --data ECL \
+  --datasets electricity \
+  --target_data electricity \
   --features M \
-  --seq_len 512 \
+  --seq_len $seq_len \
   --label_len 48 \
   --pred_len 336 \
-  --e_layers 2 \
-  --d_layers 1 \
   --factor 3 \
-  --enc_in 321 \
-  --dec_in 321 \
-  --c_out 321 \
+  --enc_in 7 \
+  --dec_in 7 \
+  --c_out 7 \
+  --des 'Exp' \
+  --itr 1 \
+  --d_model $d_model \
+  --llm_model GPT2 \
+  --llm_dim 768 \
+  --d_ff $d_ff \
+  --n_heads $n_heads \
+  --patience $patience \
   --batch_size $batch_size \
+  --eval_batch_size $eval_batch_size \
   --learning_rate $learning_rate \
   --llm_layers $llama_layers \
+  --lradj 'COS' \
   --train_epochs $train_epochs \
+  --percent $percent \
+  --align_text \
+  --decomp_level $decomp_level \
+  --decomp_method $decomp_method \
+  --combination 'late' \
   --model_comment $comment
 
-  accelerate launch --multi_gpu --mixed_precision bf16 --num_processes $num_process --main_process_port $master_port run_main.py \
+accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
   --task_name long_term_forecast \
   --is_training 1 \
-  --root_path ./dataset/electricity/ \
-  --data_path electricity.csv \
-  --model_id ECL_512_720 \
+  --root_path ./dataset/ETT-small/ \
+  --data_path ETTh1.csv \
+  --model_id ECL_512 \
   --model $model_name \
-  --data ECL \
+  --datasets electricity \
+  --target_data electricity \
   --features M \
-  --seq_len 512 \
+  --seq_len $seq_len \
   --label_len 48 \
   --pred_len 720 \
-  --e_layers 2 \
-  --d_layers 1 \
   --factor 3 \
-  --enc_in 321 \
-  --dec_in 321 \
-  --c_out 321 \
+  --enc_in 7 \
+  --dec_in 7 \
+  --c_out 7 \
+  --des 'Exp' \
+  --itr 1 \
+  --d_model $d_model \
+  --llm_model GPT2 \
+  --llm_dim 768 \
+  --d_ff $d_ff \
+  --n_heads $n_heads \
+  --patience $patience \
   --batch_size $batch_size \
+  --eval_batch_size $eval_batch_size \
   --learning_rate $learning_rate \
   --llm_layers $llama_layers \
+  --lradj 'COS' \
   --train_epochs $train_epochs \
+  --percent $percent \
+  --align_text \
+  --decomp_level $decomp_level \
+  --decomp_method $decomp_method \
+  --combination 'late' \
   --model_comment $comment
