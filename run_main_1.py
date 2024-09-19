@@ -123,23 +123,16 @@ config = get_init_config(args.config_path)
 accelerator.print(args)
 for ii in range(args.itr):
     # setting record of experiments
-    setting = '{}_{}_{}_{}_ft{}_sl{}_ll{}_pl{}_dm{}_nh{}_el{}_dl{}_df{}_fc{}_eb{}_{}_{}'.format(
+    setting = '{}_{}_{}_{}_sl{}_ll{}_pl{}_dm{}_df{}_{}'.format(
         args.task_name,
         args.model_id,
         args.model,
         args.target_data,
-        args.features,
         args.seq_len,
         args.label_len,
         args.pred_len,
         args.d_model,
-        args.n_heads,
-        args.e_layers,
-        args.d_layers,
-        args.d_ff,
-        args.factor,
-        args.embed,
-        args.des, ii)
+        args.d_ff, ii)
 
     train_data_name = args.datasets.split(',')
     print(train_data_name)

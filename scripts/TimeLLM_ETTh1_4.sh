@@ -33,7 +33,7 @@ accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
   --is_training 1 \
   --root_path ./dataset/ETT-small/ \
   --data_path ETTh1.csv \
-  --model_id ETTm2_512_96 \
+  --model_id weather_512_96 \
   --model $model_name \
   --datasets weather \
   --target_data weather \
@@ -71,7 +71,7 @@ accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
   --is_training 1 \
   --root_path ./dataset/ETT-small/ \
   --data_path ETTh1.csv \
-  --model_id ETTm2_512_96 \
+  --model_id weather_512_720 \
   --model $model_name \
   --datasets weather \
   --target_data weather \
