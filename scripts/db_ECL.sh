@@ -12,7 +12,7 @@
 #job on super mike3
 
 model_name=ST_TimeLLM_1
-train_epochs=1
+train_epochs=50
 seq_len=512
 learning_rate=0.0001
 patience=4
@@ -23,7 +23,7 @@ eval_batch_size=24
 d_model=32
 d_ff=128
 n_heads=8
-percent=2
+percent=100
 decomp_level=3
 decomp_method='STL'
 comment='1'
