@@ -69,7 +69,7 @@ datasets:
     root_path: ./dataset/electricity/
     data_path: electricity.csv
     data_name: electricity
-    data: Electricity
+    data: ECL
     lradj: type4
     features: M
     target: OT
