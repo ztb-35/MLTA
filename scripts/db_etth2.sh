@@ -4,8 +4,8 @@
 #SBATCH -p gpu
 #SBATCH -n 48#one GPU, n<16
 #SBATCH -A hpc_sundeepby4
-#SBATCH -o /project/tzhao3/TimeLLM/Reprogramming-multi-level-time-series-forecasting-by-LLMs/job/etth2_out # File name for stdout
-#SBATCH -e /project/tzhao3/TimeLLMReprogramming-multi-level-time-series-forecasting-by-LLMs/job/etth2_error # File name for error
+#SBATCH -o /work/tzhao3/TimeLLM/Reprogramming-multi-level-time-series-forecasting-by-LLMs/job/etth2_out # File name for stdout
+#SBATCH -e /work/tzhao3/TimeLLM/Reprogramming-multi-level-time-series-forecasting-by-LLMs/job/etth2_error # File name for error
 #SBATCH --mail-type END # Send email when job ends
 #SBATCH --mail-user tzhao3@lsu.edu # Send mail to this address
 #SBATCH --gres=gpu:2
