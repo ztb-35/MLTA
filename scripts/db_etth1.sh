@@ -2,7 +2,7 @@
 #SBATCH -N 1
 #SBATCH -t 72:00:00
 #SBATCH -p gpu
-#SBATCH -n 64#one GPU, n<16
+#SBATCH -n 48#one GPU, n<16
 #SBATCH -A hpc_sundeepby4
 #SBATCH -o /project/tzhao3/TimeLLM/Reprogramming-multi-level-time-series-forecasting-by-LLMs/job/etth1_out # File name for stdout
 #SBATCH -e /project/tzhao3/TimeLLMReprogramming-multi-level-time-series-forecasting-by-LLMs/job/etth1_error # File name for error
