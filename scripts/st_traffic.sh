@@ -2,41 +2,39 @@
 #SBATCH -N 1
 #SBATCH -t 72:00:00
 #SBATCH -p gpu
-#SBATCH -n 48#one GPU, n<16
-#SBATCH -A hpc_sundeepby4
-#SBATCH -o /work/tzhao3/TimeLLM/Reprogramming-multi-level-time-series-forecasting-by-LLMs/job/db_ettm2_out # File name for stdout
-#SBATCH -e /work/tzhao3/TimeLLM/Reprogramming-multi-level-time-series-forecasting-by-LLMs/job/db_ettm2_error # File name for error
+#SBATCH -n 64#one GPU, n<16
+#SBATCH -A hpc_sunsmic3m
+#SBATCH -o /project/tzhao3/TimeLLM_git_clone/Reprogramming-multi-level-time-series-forecasting-by-LLMs/job/st_traffic_out # File name for stdout
+#SBATCH -e /project/tzhao3/TimeLLM_git_clone/Reprogramming-multi-level-time-series-forecasting-by-LLMs/job/st_traffic_error # File name for error
 #SBATCH --mail-type END # Send email when job ends
 #SBATCH --mail-user tzhao3@lsu.edu # Send mail to this address
-#SBATCH --gres=gpu:2
+#SBATCH --gres=gpu:4
 #job on super mike3
 
 model_name=ST_TimeLLM_1
+d_model=32
+d_ff=128
 train_epochs=50
 seq_len=512
 learning_rate=0.0001
-patience=4
+patience=3
 llama_layers=6
-num_process=2
-batch_size=24
-eval_batch_size=24
-d_model=32
-d_ff=128
+num_process=4
+batch_size=48
+eval_batch_size=48
 n_heads=8
 percent=100
-decomp_level=1
+decomp_level=3
 decomp_method='STL'
-comment='2'
+comment='1'
 
 accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
   --task_name long_term_forecast \
   --is_training 1 \
-  --root_path ./dataset/ETT-small/ \
-  --data_path ETTm2.csv \
-  --model_id ETTm2_512_96 \
+  --model_id traffic_512_96 \
   --model $model_name \
-  --datasets ETTm2 \
-  --target_data ETTm2 \
+  --datasets traffic \
+  --target_data traffic \
   --features M \
   --seq_len $seq_len \
   --label_len 48 \
@@ -69,12 +67,10 @@ accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
 accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
   --task_name long_term_forecast \
   --is_training 1 \
-  --root_path ./dataset/ETT-small/ \
-  --data_path ETTm2.csv \
-  --model_id ETTm2_512_96 \
+  --model_id traffic_512_192 \
   --model $model_name \
-  --datasets ETTm2 \
-  --target_data ETTm2 \
+  --datasets traffic \
+  --target_data traffic \
   --features M \
   --seq_len $seq_len \
   --label_len 48 \
@@ -107,12 +103,10 @@ accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
 accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
   --task_name long_term_forecast \
   --is_training 1 \
-  --root_path ./dataset/ETT-small/ \
-  --data_path ETTm2.csv \
-  --model_id ETTm2_512_96 \
+  --model_id traffic_512_336 \
   --model $model_name \
-  --datasets ETTm2 \
-  --target_data ETTm2 \
+  --datasets traffic \
+  --target_data traffic \
   --features M \
   --seq_len $seq_len \
   --label_len 48 \
@@ -145,12 +139,10 @@ accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
 accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
   --task_name long_term_forecast \
   --is_training 1 \
-  --root_path ./dataset/ETT-small/ \
-  --data_path ETTh2.csv \
-  --model_id ETTh2_512_96 \
+  --model_id traffic_512_720 \
   --model $model_name \
-  --datasets ETTm2 \
-  --target_data ETTm2 \
+  --datasets traffic \
+  --target_data traffic \
   --features M \
   --seq_len $seq_len \
   --label_len 48 \
