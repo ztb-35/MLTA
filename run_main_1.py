@@ -312,13 +312,8 @@ for ii in range(args.itr):
         if early_stopping.early_stop:
             accelerator.print("Early stopping")
             break
-
-
-
-
-
-accelerator.wait_for_everyone()
-if accelerator.is_local_main_process:
-    path = './checkpoints'  # unique checkpoint saving path
-    del_files(path)  # delete checkpoint files
-    accelerator.print('success delete checkpoints')
+        
+    accelerator.wait_for_everyone()
+    if accelerator.is_local_main_process:
+        del_files(path)  # delete checkpoint files
+        accelerator.print('success delete checkpoints')
