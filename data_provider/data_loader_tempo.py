@@ -388,10 +388,7 @@ class Dataset_Custom(Dataset):
         self.data_name = data_name
         self.__read_data__()
 
-        if self.data_name=='weather':
-            self.enc_in = self.data_x.shape[-1]
-        else:
-            self.enc_in = 50
+        self.enc_in = self.data_x.shape[-1]
         self.tot_len = len(self.data_x) - self.seq_len - self.pred_len + 1
         # self.save_stl = 'stl/'
 
