@@ -4,14 +4,14 @@
 #SBATCH -p gpu
 #SBATCH -n 48#one GPU, n<16
 #SBATCH -A hpc_sundeepby4
-#SBATCH -o /work/tzhao3/TimeLLM/Reprogramming-multi-level-time-series-forecasting-by-LLMs/job/db_timellm_traffic_out_4 # File name for stdout
-#SBATCH -e /work/tzhao3/TimeLLM/Reprogramming-multi-level-time-series-forecasting-by-LLMs/job/db_timellm_traffic_error_4 # File name for error
+#SBATCH -o /work/tzhao3/TimeLLM/Reprogramming-multi-level-time-series-forecasting-by-LLMs/job/db_st_traffic_out_4 # File name for stdout
+#SBATCH -e /work/tzhao3/TimeLLM/Reprogramming-multi-level-time-series-forecasting-by-LLMs/job/db_st_traffic_error_4 # File name for error
 #SBATCH --mail-type END # Send email when job ends
 #SBATCH --mail-user tzhao3@lsu.edu # Send mail to this address
 #SBATCH --gres=gpu:2
 #job on super mike3
 
-model_name=TimeLLM
+model_name=ST_TimeLLM_1
 d_model=32
 d_ff=128
 train_epochs=50
@@ -24,7 +24,7 @@ batch_size=24
 eval_batch_size=24
 n_heads=8
 percent=100
-decomp_level=1
+decomp_level=3
 decomp_method='STL'
 comment='1'
 
