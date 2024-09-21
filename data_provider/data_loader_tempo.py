@@ -387,8 +387,10 @@ class Dataset_Custom(Dataset):
         self.data_path = data_path
         self.data_name = data_name
         self.__read_data__()
-
-        self.enc_in = self.data_x.shape[-1]
+        if self.data_name=="traffic":
+            self.enc_in = 200
+        else:
+            self.enc_in = self.data_x.shape[-1]
         self.tot_len = len(self.data_x) - self.seq_len - self.pred_len + 1
         # self.save_stl = 'stl/'
 
