@@ -99,7 +99,19 @@ parser.add_argument('--lradj', type=str, default='type1', help='adjust learning 
 parser.add_argument('--pct_start', type=float, default=0.2, help='pct_start')
 parser.add_argument('--use_amp', action='store_true', help='use automatic mixed precision training', default=False)
 parser.add_argument('--llm_layers', type=int, default=6)
-parser.add_argument('--percent', type=int, default=100)
+parser.add_argument('--percent', type=int, default=2)
+parser.add_argument('--output_attn_map', action='store_true',
+                    help='used for output attention map of patches and prototype tokens')#output_attn_map
+parser.add_argument('--align_text', action='store_true', help='align trext or not')
+parser.add_argument('--combination', type=str, default='late', help='combine components before go into model or not')
+parser.add_argument('--decomp_level', type=int, default=1, help='decomposition level, '
+                                                                '1 for TimeLLM, 2 for trend and seasonal, 3 for trend, seasonal and residual')
+parser.add_argument('--decomp_method', type=str, default='STL', help='decomposition method for level as 3, '
+                                                                       'STL change the original dataloader, TEMPO changes the model architecture')
+parser.add_argument('--config_path', type=str, default='./configs/multiple_datasets.yml')
+parser.add_argument('--electri_multiplier', type=int, default=1)
+parser.add_argument('--traffic_multiplier', type=int, default=1)
+parser.add_argument('--equal', type=int, default=1, help='1: equal sampling, 0: dont do the equal sampling')
 
 args = parser.parse_args()
 ddp_kwargs = DistributedDataParallelKwargs(find_unused_parameters=True)
