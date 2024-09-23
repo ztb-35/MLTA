@@ -30,7 +30,7 @@ comment='1'
 accelerate launch --multi_gpu --num_processes $num_process run_m4.py \
   --task_name long_term_forecast \
   --is_training 1 \
-  --root_path ./dataset/ETT-small/ \
+  --root_path ./dataset/m4 \
   --data_path ETTh1.csv \
   --model_id M4_512_yearly \
   --model $model_name \
@@ -60,7 +60,7 @@ accelerate launch --multi_gpu --num_processes $num_process run_m4.py \
 accelerate launch --multi_gpu --num_processes $num_process run_m4.py \
   --task_name long_term_forecast \
   --is_training 1 \
-  --root_path ./dataset/ETT-small/ \
+  --root_path ./dataset/m4 \
   --data_path ETTh1.csv \
   --model_id M4_512_quarterly \
   --model $model_name \
@@ -90,7 +90,7 @@ accelerate launch --multi_gpu --num_processes $num_process run_m4.py \
   accelerate launch --multi_gpu --num_processes $num_process run_m4.py \
   --task_name long_term_forecast \
   --is_training 1 \
-  --root_path ./dataset/ETT-small/ \
+  --root_path ./dataset/m4 \
   --data_path ETTh1.csv \
   --model_id M4_512_monthly \
   --model $model_name \
@@ -120,7 +120,7 @@ accelerate launch --multi_gpu --num_processes $num_process run_m4.py \
   accelerate launch --multi_gpu --num_processes $num_process run_m4.py \
   --task_name long_term_forecast \
   --is_training 1 \
-  --root_path ./dataset/ETT-small/ \
+  --root_path ./dataset/m4 \
   --data_path ETTh1.csv \
   --model_id M4_512_weekly \
   --model $model_name \
@@ -150,7 +150,7 @@ accelerate launch --multi_gpu --num_processes $num_process run_m4.py \
   accelerate launch --multi_gpu --num_processes $num_process run_m4.py \
   --task_name long_term_forecast \
   --is_training 1 \
-  --root_path ./dataset/ETT-small/ \
+  --root_path ./dataset/m4 \
   --data_path ETTh1.csv \
   --model_id M4_512_daily \
   --model $model_name \
@@ -180,7 +180,7 @@ accelerate launch --multi_gpu --num_processes $num_process run_m4.py \
   accelerate launch --multi_gpu --num_processes $num_process run_m4.py \
   --task_name long_term_forecast \
   --is_training 1 \
-  --root_path ./dataset/ETT-small/ \
+  --root_path ./dataset/m4 \
   --data_path ETTh1.csv \
   --model_id M4_512_hourly \
   --model $model_name \
