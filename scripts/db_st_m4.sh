@@ -27,7 +27,7 @@ decomp_level=3
 decomp_method='moving_avg'
 comment='1'
 
-accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
+accelerate launch --multi_gpu --num_processes $num_process run_m4.py \
   --task_name long_term_forecast \
   --is_training 1 \
   --root_path ./dataset/ETT-small/ \
@@ -57,7 +57,7 @@ accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
   --combination 'late' \
   --model_comment $comment
 
-accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
+accelerate launch --multi_gpu --num_processes $num_process run_m4.py \
   --task_name long_term_forecast \
   --is_training 1 \
   --root_path ./dataset/ETT-small/ \
@@ -87,7 +87,7 @@ accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
   --combination 'late' \
   --model_comment $comment
 
-  accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
+  accelerate launch --multi_gpu --num_processes $num_process run_m4.py \
   --task_name long_term_forecast \
   --is_training 1 \
   --root_path ./dataset/ETT-small/ \
@@ -117,7 +117,7 @@ accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
   --combination 'late' \
   --model_comment $comment
 
-  accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
+  accelerate launch --multi_gpu --num_processes $num_process run_m4.py \
   --task_name long_term_forecast \
   --is_training 1 \
   --root_path ./dataset/ETT-small/ \
@@ -147,7 +147,7 @@ accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
   --combination 'late' \
   --model_comment $comment
 
-  accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
+  accelerate launch --multi_gpu --num_processes $num_process run_m4.py \
   --task_name long_term_forecast \
   --is_training 1 \
   --root_path ./dataset/ETT-small/ \
@@ -177,7 +177,7 @@ accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
   --combination 'late' \
   --model_comment $comment
 
-  accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
+  accelerate launch --multi_gpu --num_processes $num_process run_m4.py \
   --task_name long_term_forecast \
   --is_training 1 \
   --root_path ./dataset/ETT-small/ \

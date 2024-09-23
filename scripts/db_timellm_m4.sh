@@ -4,14 +4,14 @@
 #SBATCH -p gpu
 #SBATCH -n 48#one GPU, n<16
 #SBATCH -A hpc_sundeepby4
-#SBATCH -o /work/tzhao3/TimeLLM/Reprogramming-multi-level-time-series-forecasting-by-LLMs/job/db_st_m4_out # File name for stdout
-#SBATCH -e /work/tzhao3/TimeLLM/Reprogramming-multi-level-time-series-forecasting-by-LLMs/job/db_st_m4_error # File name for error
+#SBATCH -o /work/tzhao3/TimeLLM/Reprogramming-multi-level-time-series-forecasting-by-LLMs/job/db_timellm_m4_out # File name for stdout
+#SBATCH -e /work/tzhao3/TimeLLM/Reprogramming-multi-level-time-series-forecasting-by-LLMs/job/db_timellm_m4_error # File name for error
 #SBATCH --mail-type END # Send email when job ends
 #SBATCH --mail-user tzhao3@lsu.edu # Send mail to this address
 #SBATCH --gres=gpu:2
 #job on super mike3
 
-model_name=TimeLLM
+model_name=ST_TimeLLM_3
 d_model=32
 d_ff=128
 train_epochs=50
@@ -27,7 +27,7 @@ decomp_level=1
 decomp_method='moving_avg'
 comment='1'
 
-accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
+accelerate launch --multi_gpu --num_processes $num_process run_m4.py \
   --task_name long_term_forecast \
   --is_training 1 \
   --root_path ./dataset/ETT-small/ \
@@ -57,7 +57,7 @@ accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
   --combination 'late' \
   --model_comment $comment
 
-accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
+accelerate launch --multi_gpu --num_processes $num_process run_m4.py \
   --task_name long_term_forecast \
   --is_training 1 \
   --root_path ./dataset/ETT-small/ \
@@ -87,7 +87,7 @@ accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
   --combination 'late' \
   --model_comment $comment
 
-  accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
+  accelerate launch --multi_gpu --num_processes $num_process run_m4.py \
   --task_name long_term_forecast \
   --is_training 1 \
   --root_path ./dataset/ETT-small/ \
@@ -117,7 +117,7 @@ accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
   --combination 'late' \
   --model_comment $comment
 
-  accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
+  accelerate launch --multi_gpu --num_processes $num_process run_m4.py \
   --task_name long_term_forecast \
   --is_training 1 \
   --root_path ./dataset/ETT-small/ \
@@ -147,7 +147,7 @@ accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
   --combination 'late' \
   --model_comment $comment
 
-  accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
+  accelerate launch --multi_gpu --num_processes $num_process run_m4.py \
   --task_name long_term_forecast \
   --is_training 1 \
   --root_path ./dataset/ETT-small/ \
@@ -177,7 +177,7 @@ accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
   --combination 'late' \
   --model_comment $comment
 
-  accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
+  accelerate launch --multi_gpu --num_processes $num_process run_m4.py \
   --task_name long_term_forecast \
   --is_training 1 \
   --root_path ./dataset/ETT-small/ \

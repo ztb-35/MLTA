@@ -407,6 +407,7 @@ class Model(nn.Module):
                     else:
                         llama_components_out = torch.cat([prompt_embeddings, prompt_residual, v], dim=1)
                 elif k == 'original':
+                    source_embeddings = source_embeddings_original
                     if self.align_text:
                         components_out, attn_map = self.reprogramming_layer(v, source_embeddings, source_embeddings)
                         llama_components_out = torch.cat([prompt_embeddings, prompt_original, components_out], dim=1)
