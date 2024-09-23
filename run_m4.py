@@ -222,15 +222,15 @@ for ii in range(args.itr):
                 speed = (time.time() - time_now) / iter_count
                 left_time = speed * ((args.train_epochs - epoch) * train_steps - i)
                 accelerator.print('\tspeed: {:.4f}s/iter; left time: {:.4f}s'.format(speed, left_time))
+                accelerator.print("lr = {:.10f}".format(model_optim.param_groups[0]['lr']))
                 iter_count = 0
                 time_now = time.time()
 
             accelerator.backward(loss)
             model_optim.step()
 
-            if args.lradj == 'TST':
-                adjust_learning_rate(accelerator, model_optim, scheduler, epoch + 1, args, printout=False)
-                scheduler.step()
+
+        scheduler.step()
 
         accelerator.print("Epoch: {} cost time: {}".format(epoch + 1, time.time() - epoch_time))
         train_loss = np.average(train_loss)
@@ -244,10 +244,6 @@ for ii in range(args.itr):
             accelerator.print("Early stopping")
             break
 
-        if args.lradj != 'TST':
-            adjust_learning_rate(accelerator, model_optim, scheduler, epoch + 1, args, printout=True)
-        else:
-            accelerator.print('Updating learning rate to {}'.format(scheduler.get_last_lr()[0]))
 
     best_model_path = path + '/' + 'checkpoint'
     accelerator.wait_for_everyone()
