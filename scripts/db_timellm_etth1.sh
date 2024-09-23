@@ -29,119 +29,6 @@ decomp_level=1
 decomp_method='STL'
 comment='1'
 
-accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
-  --task_name long_term_forecast \
-  --is_training 1 \
-  --root_path ./dataset/ETT-small/ \
-  --data_path ETTh1.csv \
-  --model_id ETTh1_512_96 \
-  --model $model_name \
-  --datasets ETTh1 \
-  --target_data ETTh1 \
-  --features M \
-  --seq_len $seq_len \
-  --label_len 48 \
-  --pred_len 96 \
-  --factor 3 \
-  --enc_in 7 \
-  --dec_in 7 \
-  --c_out 7 \
-  --des 'Exp' \
-  --itr 1 \
-  --d_model $d_model \
-  --llm_model GPT2 \
-  --llm_dim 768 \
-  --d_ff $d_ff \
-  --n_heads $n_heads \
-  --patience $patience \
-  --batch_size $batch_size \
-  --eval_batch_size $eval_batch_size \
-  --learning_rate $learning_rate \
-  --llm_layers $llama_layers \
-  --lradj 'COS' \
-  --train_epochs $train_epochs \
-  --percent $percent \
-  --align_text \
-  --decomp_level $decomp_level \
-  --decomp_method $decomp_method \
-  --combination 'late' \
-  --model_comment $comment
-
-accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
-  --task_name long_term_forecast \
-  --is_training 1 \
-  --root_path ./dataset/ETT-small/ \
-  --data_path ETTh1.csv \
-  --model_id ETTh1_512_192 \
-  --model $model_name \
-  --datasets ETTh1 \
-  --target_data ETTh1 \
-  --features M \
-  --seq_len $seq_len \
-  --label_len 48 \
-  --pred_len 192 \
-  --factor 3 \
-  --enc_in 7 \
-  --dec_in 7 \
-  --c_out 7 \
-  --des 'Exp' \
-  --itr 1 \
-  --d_model $d_model \
-  --llm_model GPT2 \
-  --llm_dim 768 \
-  --d_ff $d_ff \
-  --n_heads $n_heads \
-  --patience $patience \
-  --batch_size $batch_size \
-  --eval_batch_size $eval_batch_size \
-  --learning_rate $learning_rate \
-  --llm_layers $llama_layers \
-  --lradj 'COS' \
-  --train_epochs $train_epochs \
-  --percent $percent \
-  --align_text \
-  --decomp_level $decomp_level \
-  --decomp_method $decomp_method \
-  --combination 'late' \
-  --model_comment $comment
-
-accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
-  --task_name long_term_forecast \
-  --is_training 1 \
-  --root_path ./dataset/ETT-small/ \
-  --data_path ETTh1.csv \
-  --model_id ETTh1_512_336 \
-  --model $model_name \
-  --datasets ETTh1 \
-  --target_data ETTh1 \
-  --features M \
-  --seq_len $seq_len \
-  --label_len 48 \
-  --pred_len 336 \
-  --factor 3 \
-  --enc_in 7 \
-  --dec_in 7 \
-  --c_out 7 \
-  --des 'Exp' \
-  --itr 1 \
-  --d_model $d_model \
-  --llm_model GPT2 \
-  --llm_dim 768 \
-  --d_ff $d_ff \
-  --n_heads $n_heads \
-  --patience $patience \
-  --batch_size $batch_size \
-  --eval_batch_size $eval_batch_size \
-  --learning_rate $learning_rate \
-  --llm_layers $llama_layers \
-  --lradj 'COS' \
-  --train_epochs $train_epochs \
-  --percent $percent \
-  --align_text \
-  --decomp_level $decomp_level \
-  --decomp_method $decomp_method \
-  --combination 'late' \
-  --model_comment $comment
 
 accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
   --task_name long_term_forecast \
@@ -180,3 +67,118 @@ accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
   --decomp_method $decomp_method \
   --combination 'late' \
   --model_comment $comment
+
+
+#  accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
+#   --task_name long_term_forecast \
+#   --is_training 1 \
+#   --root_path ./dataset/ETT-small/ \
+#   --data_path ETTh1.csv \
+#   --model_id ETTh1_512_96 \
+#   --model $model_name \
+#   --datasets ETTh1 \
+#   --target_data ETTh1 \
+#   --features M \
+#   --seq_len $seq_len \
+#   --label_len 48 \
+#   --pred_len 96 \
+#   --factor 3 \
+#   --enc_in 7 \
+#   --dec_in 7 \
+#   --c_out 7 \
+#   --des 'Exp' \
+#   --itr 1 \
+#   --d_model $d_model \
+#   --llm_model GPT2 \
+#   --llm_dim 768 \
+#   --d_ff $d_ff \
+#   --n_heads $n_heads \
+#   --patience $patience \
+#   --batch_size $batch_size \
+#   --eval_batch_size $eval_batch_size \
+#   --learning_rate $learning_rate \
+#   --llm_layers $llama_layers \
+#   --lradj 'COS' \
+#   --train_epochs $train_epochs \
+#   --percent $percent \
+#   --align_text \
+#   --decomp_level $decomp_level \
+#   --decomp_method $decomp_method \
+#   --combination 'late' \
+#   --model_comment $comment
+
+# accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
+#   --task_name long_term_forecast \
+#   --is_training 1 \
+#   --root_path ./dataset/ETT-small/ \
+#   --data_path ETTh1.csv \
+#   --model_id ETTh1_512_192 \
+#   --model $model_name \
+#   --datasets ETTh1 \
+#   --target_data ETTh1 \
+#   --features M \
+#   --seq_len $seq_len \
+#   --label_len 48 \
+#   --pred_len 192 \
+#   --factor 3 \
+#   --enc_in 7 \
+#   --dec_in 7 \
+#   --c_out 7 \
+#   --des 'Exp' \
+#   --itr 1 \
+#   --d_model $d_model \
+#   --llm_model GPT2 \
+#   --llm_dim 768 \
+#   --d_ff $d_ff \
+#   --n_heads $n_heads \
+#   --patience $patience \
+#   --batch_size $batch_size \
+#   --eval_batch_size $eval_batch_size \
+#   --learning_rate $learning_rate \
+#   --llm_layers $llama_layers \
+#   --lradj 'COS' \
+#   --train_epochs $train_epochs \
+#   --percent $percent \
+#   --align_text \
+#   --decomp_level $decomp_level \
+#   --decomp_method $decomp_method \
+#   --combination 'late' \
+#   --model_comment $comment
+
+# accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
+#   --task_name long_term_forecast \
+#   --is_training 1 \
+#   --root_path ./dataset/ETT-small/ \
+#   --data_path ETTh1.csv \
+#   --model_id ETTh1_512_336 \
+#   --model $model_name \
+#   --datasets ETTh1 \
+#   --target_data ETTh1 \
+#   --features M \
+#   --seq_len $seq_len \
+#   --label_len 48 \
+#   --pred_len 336 \
+#   --factor 3 \
+#   --enc_in 7 \
+#   --dec_in 7 \
+#   --c_out 7 \
+#   --des 'Exp' \
+#   --itr 1 \
+#   --d_model $d_model \
+#   --llm_model GPT2 \
+#   --llm_dim 768 \
+#   --d_ff $d_ff \
+#   --n_heads $n_heads \
+#   --patience $patience \
+#   --batch_size $batch_size \
+#   --eval_batch_size $eval_batch_size \
+#   --learning_rate $learning_rate \
+#   --llm_layers $llama_layers \
+#   --lradj 'COS' \
+#   --train_epochs $train_epochs \
+#   --percent $percent \
+#   --align_text \
+#   --decomp_level $decomp_level \
+#   --decomp_method $decomp_method \
+#   --combination 'late' \
+#   --model_comment $comment
