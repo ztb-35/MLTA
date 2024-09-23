@@ -238,7 +238,8 @@ def test(args, accelerator, model, train_loader, vali_loader, criterion):
         f_dim = -1 if args.features == 'MS' else 0
         outputs = outputs[:, -args.pred_len:, f_dim:]
         pred = outputs
-        true = torch.from_numpy(np.array(y)).to(accelerator.device)
+        #true = torch.from_numpy(np.array(y)).to(accelerator.device)
+        true = torch.from_numpy(np.array(torch.tensor(y, dtype=torch.float32))).to(accelerator.device)
         batch_y_mark = torch.ones(true.shape).to(accelerator.device)
         true = accelerator.gather_for_metrics(true)
         batch_y_mark = accelerator.gather_for_metrics(batch_y_mark)
