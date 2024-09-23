@@ -6,7 +6,7 @@ from torch import optim
 from torch.optim import lr_scheduler
 
 from data_provider.m4 import M4Meta
-from models import Autoformer, DLinear, TimeLLM, ST_TimeLLM_1
+from models import Autoformer, DLinear, TimeLLM, ST_TimeLLM_3
 
 from data_provider.data_factory import data_provider
 import time
