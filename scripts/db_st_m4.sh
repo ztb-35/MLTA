@@ -25,7 +25,7 @@ n_heads=8
 percent=100
 decomp_level=3
 decomp_method='moving_avg'
-comment='1'
+comment='3'
 
 accelerate launch --multi_gpu --num_processes $num_process run_m4.py \
   --task_name long_term_forecast \
