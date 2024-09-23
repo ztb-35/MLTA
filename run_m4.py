@@ -60,7 +60,7 @@ parser.add_argument('--checkpoints', type=str, default='./checkpoints/', help='l
 parser.add_argument('--seq_len', type=int, default=96, help='input sequence length')
 parser.add_argument('--label_len', type=int, default=48, help='start token length')
 parser.add_argument('--pred_len', type=int, default=96, help='prediction sequence length')
-parser.add_argument('--seasonal_patterns', type=str, default='Monthly', help='subset for M4')
+parser.add_argument('--seasonal_patterns', type=str, default='Monthly', help='subset for M4')#Yearly,Monthly,Daily, Hourly, Quarterly, Weekly
 
 # model define
 parser.add_argument('--enc_in', type=int, default=7, help='encoder input size')
@@ -142,8 +142,8 @@ for ii in range(args.itr):
         model = DLinear.Model(args).float()
     elif args.model == 'TimeLLM'
         model = TimeLLM.Model(args).float()
-    elif args.model == 'ST_TimeLLM_1':
-        model = ST_TimeLLM_1.Model(args).float()
+    elif args.model == 'ST_TimeLLM_3':
+        model = ST_TimeLLM_3.Model(args).float()
 
     path = os.path.join(args.checkpoints,
                         setting + '-' + args.model_comment)  # unique checkpoint saving path
