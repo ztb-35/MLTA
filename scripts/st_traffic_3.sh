@@ -39,7 +39,7 @@ accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
   --features M \
   --seq_len $seq_len \
   --label_len 48 \
-  --pred_len 720 \
+  --pred_len 336 \
   --factor 3 \
   --enc_in 7 \
   --dec_in 7 \
