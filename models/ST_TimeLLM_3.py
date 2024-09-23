@@ -224,8 +224,7 @@ class Model(nn.Module):
     def forward(self, x_enc, x_mark_enc, x_dec, x_mark_dec, mask=None):
         if self.task_name == 'long_term_forecast' or self.task_name == 'short_term_forecast':
             if self.align_text:
-                dec_out, attn_map_list = self.forecast(x_enc, x_mark_enc, x_dec, x_mark_dec, seq_trend, seq_seasonal,
-                                                       seq_resid)
+                dec_out, attn_map_list = self.forecast(x_enc, x_mark_enc, x_dec, x_mark_dec)
                 # accelerator.print("args.output_attn_map is " + str(self.output_attn_map))
                 if self.output_attn_map:
                     return dec_out[:, -self.pred_len:,
@@ -233,7 +232,7 @@ class Model(nn.Module):
                 else:
                     return dec_out[:, -self.pred_len:, :]
             else:
-                dec_out = self.forecast(x_enc, x_mark_enc, x_dec, x_mark_dec, seq_trend, seq_seasonal, seq_resid)
+                dec_out = self.forecast(x_enc, x_mark_enc, x_dec, x_mark_dec)
                 return dec_out[:, -self.pred_len:, :]
         return None
 
