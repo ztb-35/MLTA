@@ -221,7 +221,7 @@ class Model(nn.Module):
 
         self.normalize_layers = Normalize(configs.enc_in, affine=False)
 
-    def forward(self, x_enc, x_mark_enc, x_dec, x_mark_dec, seq_trend, seq_seasonal, seq_resid, mask=None):
+    def forward(self, x_enc, x_mark_enc, x_dec, x_mark_dec, mask=None):
         if self.task_name == 'long_term_forecast' or self.task_name == 'short_term_forecast':
             if self.align_text:
                 dec_out, attn_map_list = self.forecast(x_enc, x_mark_enc, x_dec, x_mark_dec, seq_trend, seq_seasonal,
