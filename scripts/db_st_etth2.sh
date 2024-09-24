@@ -26,7 +26,7 @@ n_heads=8
 percent=100
 decomp_level=3
 decomp_method='STL'
-comment='1'
+comment='2'
 
 
 accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
