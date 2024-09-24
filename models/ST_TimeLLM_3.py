@@ -194,7 +194,7 @@ class Model(nn.Module):
         self.vocab_size = self.word_embeddings.shape[0]
         self.num_tokens = 100
         self.num_tokens_trend = 10
-        self.num_tokens_seasonal = 50
+        self.num_tokens_seasonal = 10
         self.mapping_layer = nn.Linear(self.vocab_size, self.num_tokens)
         self.mapping_layer_trend = nn.Linear(self.vocab_size, self.num_tokens_trend)
         self.mapping_layer_seasonal = nn.Linear(self.vocab_size, self.num_tokens_seasonal)
