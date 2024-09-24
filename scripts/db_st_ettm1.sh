@@ -15,7 +15,7 @@
 model_name=ST_TimeLLM_1
 d_model=32
 d_ff=128
-train_epochs=1
+train_epochs=50
 seq_len=512
 learning_rate=0.0001
 patience=10
@@ -24,7 +24,7 @@ num_process=2
 batch_size=48
 eval_batch_size=48
 n_heads=8
-percent=1
+percent=100
 decomp_level=3
 decomp_method='STL'
 comment='1'
