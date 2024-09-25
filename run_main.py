@@ -349,10 +349,10 @@ if not args.output_attn_map:
                     #accelerator.wait_for_everyone()
                     accelerator.print("here we go")
                     model = accelerator.unwrap_model(model)
-                    torch.save(model.state_dict(), path + '/' +str(epoch)+ '_checkpoint')
+                    torch.save(model.state_dict(), path + '/' + '_epoch_' + str(epoch) + 'checkpoint')
                 else:
                     accelerator.print("here we go!!!")
-                    torch.save(model.state_dict(), path + '/' +str(epoch)+ '_checkpoint')
+                    torch.save(model.state_dict(), path + '/' + '_epoch_' + str(epoch) + 'checkpoint')
             early_stopping(vali_loss, model, path)
             if early_stopping.early_stop:
                 accelerator.print("Early stopping")
