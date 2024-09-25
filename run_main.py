@@ -345,10 +345,10 @@ if not args.output_attn_map:
                 "Epoch: {0} | Train Loss: {1:.7f} Vali Loss: {2:.7f} Test MSE: {3:.7f} MAE Loss: {4:.7f}".format(
                     epoch + 1, train_loss, vali_loss, test_loss, test_mae_loss))
             if epoch in save_epochs:
-                if self.accelerator is not None:
+                if accelerator is not None:
                     #accelerator.wait_for_everyone()
                     accelerator.print("here we go")
-                    model = self.accelerator.unwrap_model(model)
+                    model = accelerator.unwrap_model(model)
                     torch.save(model.state_dict(), path + '/' +str(epoch)+ '_checkpoint')
                 else:
                     accelerator.print("here we go!!!")
