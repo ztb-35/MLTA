@@ -162,9 +162,9 @@ class Dataset_ETT_hour(Dataset):
         self.resid_stamp = resid_stamp[border1:border2]
 
     def __getitem__(self, index):
-        # if self.output_attn_map:
-        #     index = 10
-        #     self.tot_len = 1
+        if self.output_attn_map:
+            index = 10
+            self.tot_len = 1
         feat_id = index // self.tot_len
         s_begin = index % self.tot_len
 
