@@ -293,8 +293,7 @@ if not args.output_attn_map:
         # Assume 'model' is your PyTorch model
         model = nn.DataParallel(model)
         save_epochs = [0, 2, 5, 10, 100]
-        train_loader, vali_loader, test_loader, model, model_optim, scheduler 
-                                = accelerator.prepare(train_loader, vali_loader, test_loader, model, model_optim, scheduler)
+        train_loader, vali_loader, test_loader, model, model_optim, scheduler = accelerator.prepare(train_loader, vali_loader, test_loader, model, model_optim, scheduler)
 
 
         for epoch in range(args.train_epochs):
