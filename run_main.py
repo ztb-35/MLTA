@@ -11,7 +11,7 @@ from torch import nn, optim
 from torch.optim import lr_scheduler
 from tqdm import tqdm
 
-from models import Autoformer, DLinear, TimeLLM, ST_TimeLLM_1, ST_TimeLLM_2, TEMPO
+from models import  ST_TimeLLM_1, ST_TimeLLM_2
 
 from data_provider.data_factory_tempo import data_provider
 import time
@@ -251,18 +251,12 @@ if not args.output_attn_map:
             args.freq = 'h'
         test_data, test_loader = data_provider(args, 'test')
 
-        if args.model == 'Autoformer':
-            model = Autoformer.Model(args).float()
-        elif args.model == 'DLinear':
-            model = DLinear.Model(args).float()
-        elif args.model == 'ST_TimeLLM_1':
+
+        if args.model == 'ST_TimeLLM_1':
             model = ST_TimeLLM_1.Model(args).float()
         elif args.model == 'ST_TimeLLM_2':
             model = ST_TimeLLM_2.Model(args).float()
-        elif args.model == 'TimeLLM':
-            model = TimeLLM.Model(args).float()
-        elif args.model == 'TEMPO':
-            model = TEMPO.TEMPO(args).float()
+
         path = os.path.join(args.checkpoints,
                             setting + '-' + args.model_comment)  # unique checkpoint saving path
         args.content = load_content(args)
