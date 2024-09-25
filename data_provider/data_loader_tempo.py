@@ -179,7 +179,7 @@ class Dataset_ETT_hour(Dataset):
         seq_seasonal = self.seasonal_stamp[s_begin:s_end, feat_id:feat_id + 1]
         seq_resid = self.resid_stamp[s_begin:s_end, feat_id:feat_id + 1]
 
-        return seq_x, seq_y, seq_x_mark, seq_y_mark, seq_trend, seq_seasonal, seq_resid, index
+        return seq_x, seq_y, seq_x_mark, seq_y_mark, seq_trend, seq_seasonal, seq_resid
 
     def __len__(self):
         return (len(self.data_x) - self.seq_len - self.pred_len + 1) * self.enc_in
