@@ -228,14 +228,11 @@ class Model(nn.Module):
                                                        seq_resid)
                 # accelerator.print("args.output_attn_map is " + str(self.output_attn_map))
                 if self.output_attn_map:
-                    print("here print out 2")
                     return dec_out[:, -self.pred_len:,
                            :], attn_map_list  # attn_map in order of seasonal, trend, residual
                 else:
-                    print("here print out 1")
                     return dec_out[:, -self.pred_len:, :]
             else:
-                print("here print out 1!!!!")
                 dec_out = self.forecast(x_enc, x_mark_enc, x_dec, x_mark_dec, seq_trend, seq_seasonal, seq_resid)
                 return dec_out[:, -self.pred_len:, :]
         return None
