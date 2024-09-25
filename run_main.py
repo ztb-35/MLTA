@@ -358,7 +358,7 @@ if not args.output_attn_map:
                 accelerator.print("Early stopping")
                 break
 
-        args.args.output_attn_map=True
+        args.output_attn_map=True
 
         test_data, test_loader = data_provider(args, 'test')
 
