@@ -143,11 +143,14 @@ parser.add_argument('--equal', type=int, default=1, help='1: equal sampling, 0: 
 args = parser.parse_args()
 
 args = parser.parse_args()
-
-print(args)
+ddp_kwargs = DistributedDataParallelKwargs(find_unused_parameters=True)
+deepspeed_plugin = DeepSpeedPlugin(hf_ds_config='./ds_config_zero2.json')
+accelerator = Accelerator(kwargs_handlers=[ddp_kwargs], deepspeed_plugin=deepspeed_plugin)
 mses = []
 maes = []
 config = get_init_config(args.config_path)
+accelerator.print(args)
+
 if not args.output_attn_map:
     for ii in range(args.itr):
         # setting record of experiments
