@@ -365,15 +365,15 @@ if not args.output_attn_map:
         for epoch in save_epochs:
             #here epoch = 100 means the final svaed model(best model)
             if epoch != 100:
-                state_dict = torch.load(path + '/' + '_epoch_' + str(epoch) + 'checkpoint')
+                model_path = path + '/' + '_epoch_' + str(epoch) + 'checkpoint'
             else:
-                state_dict = torch.load(path + '/' + 'checkpoint')
-            new_state_dict = {'module.' + k: v for k, v in state_dict.items()}
+                model_path = path + '/' + 'checkpoint'
+            #new_state_dict = {'module.' + k: v for k, v in state_dict.items()}
             accelerator.wait_for_everyone()
             unwrapped_model = accelerator.unwrap_model(model)
             torch.cuda.synchronize()
             torch.cuda.empty_cache()
-            unwrapped_model.load_state_dict(torch.load(best_model_path, map_location=lambda storage, loc: storage))
+            unwrapped_model.load_state_dict(torch.load(model_path, map_location=lambda storage, loc: storage))
 
             model.eval()
             batch_x, batch_y, batch_x_mark, batch_y_mark, seq_trend, seq_seasonal, seq_resid = next(iter(test_loader))
