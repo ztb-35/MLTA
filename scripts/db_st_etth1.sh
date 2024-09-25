@@ -24,7 +24,7 @@ num_process=2
 batch_size=48
 eval_batch_size=48
 n_heads=8
-percent=100
+percent=10
 decomp_level=3
 decomp_method='STL'
 comment='1'
@@ -69,7 +69,7 @@ accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
   --model_comment $comment
 
 
- accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
+accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
   --task_name long_term_forecast \
   --is_training 1 \
   --root_path ./dataset/ETT-small/ \

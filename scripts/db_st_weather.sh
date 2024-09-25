@@ -4,8 +4,8 @@
 #SBATCH -p gpu
 #SBATCH -n 48#one GPU, n<16
 #SBATCH -A hpc_sundeepby4
-#SBATCH -o /work/tzhao3/TimeLLM/Reprogramming-multi-level-time-series-forecasting-by-LLMs/job/db_st_ettm1_out # File name for stdout
-#SBATCH -e /work/tzhao3/TimeLLM/Reprogramming-multi-level-time-series-forecasting-by-LLMs/job/db_st_ettm1_error # File name for error
+#SBATCH -o /work/tzhao3/TimeLLM/Reprogramming-multi-level-time-series-forecasting-by-LLMs/job/db_st_weather_out # File name for stdout
+#SBATCH -e /work/tzhao3/TimeLLM/Reprogramming-multi-level-time-series-forecasting-by-LLMs/job/db_st_weather_error # File name for error
 #SBATCH --mail-type END # Send email when job ends
 #SBATCH --mail-user tzhao3@lsu.edu # Send mail to this address
 #SBATCH --gres=gpu:2
@@ -29,16 +29,15 @@ decomp_level=3
 decomp_method='STL'
 comment='1'
 
-
 accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
   --task_name long_term_forecast \
   --is_training 1 \
-  --root_path ./dataset/ETT-small/ \
-  --data_path ETTm1.csv \
-  --model_id ETTm1_512_96 \
+  --root_path ./dataset/weather/ \
+  --data_path weather.csv \
+  --model_id weather_512_96 \
   --model $model_name \
-  --datasets ETTm1 \
-  --target_data ETTm1 \
+  --datasets weather \
+  --target_data weather \
   --features M \
   --seq_len $seq_len \
   --label_len 48 \
@@ -71,12 +70,12 @@ accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
 accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
   --task_name long_term_forecast \
   --is_training 1 \
-  --root_path ./dataset/ETT-small/ \
-  --data_path ETTm1.csv \
-  --model_id ETTm1_512_192 \
+  --root_path ./dataset/weather/ \
+  --data_path weather.csv \
+  --model_id weather_512_192 \
   --model $model_name \
-  --datasets ETTm1 \
-  --target_data ETTm1 \
+  --datasets weather \
+  --target_data weather \
   --features M \
   --seq_len $seq_len \
   --label_len 48 \
@@ -109,12 +108,12 @@ accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
 accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
   --task_name long_term_forecast \
   --is_training 1 \
-  --root_path ./dataset/ETT-small/ \
-  --data_path ETTm1.csv \
-  --model_id ETTm1_512_336 \
+  --root_path ./dataset/weather/ \
+  --data_path weather.csv \
+  --model_id weather_512_336 \
   --model $model_name \
-  --datasets ETTm1 \
-  --target_data ETTm1 \
+  --datasets weather \
+  --target_data weather \
   --features M \
   --seq_len $seq_len \
   --label_len 48 \
@@ -147,12 +146,12 @@ accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
 accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
   --task_name long_term_forecast \
   --is_training 1 \
-  --root_path ./dataset/ETT-small/ \
-  --data_path ETTm1.csv \
-  --model_id ETTm1_512_720 \
+  --root_path ./dataset/weather/ \
+  --data_path weather.csv \
+  --model_id weather_512_720 \
   --model $model_name \
-  --datasets ETTm1 \
-  --target_data ETTm1 \
+  --datasets weather \
+  --target_data weather \
   --features M \
   --seq_len $seq_len \
   --label_len 48 \
@@ -181,5 +180,3 @@ accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
   --decomp_method $decomp_method \
   --combination 'late' \
   --model_comment $comment
-
-
