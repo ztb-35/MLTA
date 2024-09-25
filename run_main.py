@@ -287,8 +287,7 @@ if not args.output_attn_map:
 
         criterion = nn.MSELoss()
         mae_metric = nn.L1Loss()
-        # Assume 'model' is your PyTorch model
-        model = nn.DataParallel(model)
+
         save_epochs = [0, 2, 5, 10, 100]
         train_loader, vali_loader, test_loader, model, model_optim, scheduler = accelerator.prepare(train_loader, vali_loader, test_loader, model, model_optim, scheduler)
 
@@ -379,16 +378,16 @@ if not args.output_attn_map:
             model.eval()
             batch_x, batch_y, batch_x_mark, batch_y_mark, seq_trend, seq_seasonal, seq_resid = next(iter(test_loader))
             model_optim.zero_grad()
-            batch_x = batch_x.float().to(device)
-            batch_y = batch_y.float().to(device)
-            batch_x_mark = batch_x_mark.float().to(device)
-            batch_y_mark = batch_y_mark.float().to(device)
-            seq_trend = seq_trend.float().to(device)
-            seq_seasonal = seq_seasonal.float().to(device)
-            seq_resid = seq_resid.float().to(device)
+            batch_x = batch_x.float().to(accelerator.device)
+            batch_y = batch_y.float().to(accelerator.device)
+            batch_x_mark = batch_x_mark.float().to(accelerator.device)
+            batch_y_mark = batch_y_mark.float().to(accelerator.device)
+            seq_trend = seq_trend.float().to(accelerator.device)
+            seq_seasonal = seq_seasonal.float().to(accelerator.device)
+            seq_resid = seq_resid.float().to(accelerator.device)
             # decoder input
-            dec_inp = torch.zeros_like(batch_y[:, -args.pred_len:, :]).float().to(device)
-            dec_inp = torch.cat([batch_y[:, :args.label_len, :], dec_inp], dim=1).float().to(device)
+            dec_inp = torch.zeros_like(batch_y[:, -args.pred_len:, :]).float().to(accelerator.device)
+            dec_inp = torch.cat([batch_y[:, :args.label_len, :], dec_inp], dim=1).float().to(accelerator.device)
             sample = batch_x[0, :, 0]  # Shape will be (length,)
             sample_trend = seq_trend[0, :, 0]
             sample_seasonal = seq_seasonal[0, :, 0]
