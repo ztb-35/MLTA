@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH -N 1
 #SBATCH -t 72:00:00
-#SBATCH -p gpu
+#SBATCH -p gpu4
 #SBATCH -n 64#one GPU, n<16
 #SBATCH -A hpc_sunsmic3m
 #SBATCH -o /project/tzhao3/TimeLLM_git_clone/Reprogramming-multi-level-time-series-forecasting-by-LLMs/job/st_ettm2_out # File name for stdout
