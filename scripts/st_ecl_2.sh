@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH -N 1
 #SBATCH -t 72:00:00
-#SBATCH -p gpu
+#SBATCH -p gpu4
 #SBATCH -n 64#one GPU, n<16
 #SBATCH -A hpc_sunsmic3m
 #SBATCH -o /project/tzhao3/TimeLLM_git_clone/Reprogramming-multi-level-time-series-forecasting-by-LLMs/job/st_ecl_out_2 # File name for stdout
@@ -23,7 +23,7 @@ num_process=4
 batch_size=48
 eval_batch_size=48
 n_heads=8
-percent=100
+percent=10
 decomp_level=3
 decomp_method='STL'
 comment='1'
