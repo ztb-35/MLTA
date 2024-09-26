@@ -3,7 +3,7 @@
 #SBATCH -t 72:00:00
 #SBATCH -p gpu4
 #SBATCH -n 64#one GPU, n<16
-#SBATCH -A hpc_sunsmic3m
+#SBATCH -A hpc_sunsmic2
 #SBATCH -o /project/tzhao3/TimeLLM_git_clone/Reprogramming-multi-level-time-series-forecasting-by-LLMs/job/st_traffic_out_3 # File name for stdout
 #SBATCH -e /project/tzhao3/TimeLLM_git_clone/Reprogramming-multi-level-time-series-forecasting-by-LLMs/job/st_traffic_error_3 # File name for error
 #SBATCH --mail-type END # Send email when job ends
