@@ -4,8 +4,8 @@
 #SBATCH -p gpu4
 #SBATCH -n 64#one GPU, n<16
 #SBATCH -A hpc_sunsmic3m
-#SBATCH -o /project/tzhao3/TimeLLM_git_clone/Reprogramming-multi-level-time-series-forecasting-by-LLMs/job/timellm_ecl_4_out # File name for stdout
-#SBATCH -e /project/tzhao3/TimeLLM_git_clone/Reprogramming-multi-level-time-series-forecasting-by-LLMs/job/timellm_ecl_4_error # File name for error
+#SBATCH -o /project/tzhao3/TimeLLM_git_clone/Reprogramming-multi-level-time-series-forecasting-by-LLMs/job/timellm_traffic_3_out # File name for stdout
+#SBATCH -e /project/tzhao3/TimeLLM_git_clone/Reprogramming-multi-level-time-series-forecasting-by-LLMs/job/timellm_traffic_3_error # File name for error
 #SBATCH --mail-type END # Send email when job ends
 #SBATCH --mail-user tzhao3@lsu.edu # Send mail to this address
 #SBATCH --gres=gpu:4
@@ -31,14 +31,14 @@ comment='1'
 accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
   --task_name long_term_forecast \
   --is_training 1 \
-  --model_id ECL_512_720 \
+  --model_id traffic_512_336 \
   --model $model_name \
-  --datasets electricity \
-  --target_data electricity \
+  --datasets traffic \
+  --target_data traffic \
   --features M \
   --seq_len $seq_len \
   --label_len 48 \
-  --pred_len 720 \
+  --pred_len 336 \
   --factor 3 \
   --enc_in 7 \
   --dec_in 7 \
