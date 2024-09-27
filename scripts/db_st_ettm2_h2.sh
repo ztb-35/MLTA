@@ -25,7 +25,7 @@ eval_batch_size=48
 n_heads=8
 percent=100
 decomp_level=3
-decomp_method='STL'
+decomp_method='moving_avg'
 comment='1'
 
 accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
