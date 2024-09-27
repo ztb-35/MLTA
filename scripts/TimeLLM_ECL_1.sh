@@ -4,8 +4,8 @@
 #SBATCH -p gpu4
 #SBATCH -n 64#one GPU, n<16
 #SBATCH -A hpc_sunsmic1
-#SBATCH -o /project/msun/xchen87/timellm_log/st_ecl_out_1 # File name for stdout
-#SBATCH -e /project/msun/xchen87/timellm_log/st_ecl_error_1 # File name for error
+#SBATCH -o /project/msun/xchen87/timellm_log/timellm_ecl_out_1 # File name for stdout
+#SBATCH -e /project/msun/xchen87/timellm_log/timellm_ecl_error_1 # File name for error
 #SBATCH --mail-type END # Send email when job ends
 #SBATCH --mail-user xchen87@lsu.edu # Send mail to this address
 #SBATCH --gres=gpu:4
