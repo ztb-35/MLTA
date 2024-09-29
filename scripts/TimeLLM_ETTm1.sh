@@ -35,8 +35,8 @@ accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
   --data_path ETTh1.csv \
   --model_id ETTh1_512_96 \
   --model $model_name \
-  --datasets ETTh1 \
-  --target_data ETTh1 \
+  --datasets ETTm1 \
+  --target_data ETTm1 \
   --features M \
   --seq_len $seq_len \
   --label_len 48 \
