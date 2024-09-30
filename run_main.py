@@ -358,201 +358,201 @@ if not args.output_attn_map:
                 accelerator.print("Early stopping")
                 break
 
-args.output_attn_map=True
 
-for ii in range(args.itr):
-    # setting record of experiments
-    setting = '{}_{}_{}_{}_ft{}_sl{}_ll{}_pl{}_dm{}_nh{}_el{}_dl{}_df{}_fc{}_eb{}_{}'.format(
-        args.task_name,
-        args.model_id,
-        args.model,
-        args.data,
-        args.features,
-        args.seq_len,
-        args.label_len,
-        args.pred_len,
-        args.d_model,
-        args.n_heads,
-        args.e_layers,
-        args.d_layers,
-        args.d_ff,
-        args.factor,
-        args.embed,
-        args.des)
+elif args.output_attn_map:
+    for ii in range(args.itr):
+        # setting record of experiments
+        setting = '{}_{}_{}_{}_ft{}_sl{}_ll{}_pl{}_dm{}_nh{}_el{}_dl{}_df{}_fc{}_eb{}_{}'.format(
+            args.task_name,
+            args.model_id,
+            args.model,
+            args.data,
+            args.features,
+            args.seq_len,
+            args.label_len,
+            args.pred_len,
+            args.d_model,
+            args.n_heads,
+            args.e_layers,
+            args.d_layers,
+            args.d_ff,
+            args.factor,
+            args.embed,
+            args.des)
 
 
-    # train_data, train_loader = data_provider(args, 'train')
-    # vali_data, vali_loader = data_provider(args, 'val')
-    # test_data, test_loader = data_provider(args, 'test')
-    train_data_name = args.datasets.split(',')
-    print(train_data_name)
-    train_datas = []
-    val_datas = []
-    min_sample_num = sys.maxsize
-    for dataset_singe in args.datasets.split(','):
-        print(dataset_singe)
-        args.data = config['datasets'][dataset_singe].data
-        args.root_path = config['datasets'][dataset_singe].root_path
-        args.data_path = config['datasets'][dataset_singe].data_path
-        args.data_name = config['datasets'][dataset_singe].data_name
+        # train_data, train_loader = data_provider(args, 'train')
+        # vali_data, vali_loader = data_provider(args, 'val')
+        # test_data, test_loader = data_provider(args, 'test')
+        train_data_name = args.datasets.split(',')
+        print(train_data_name)
+        train_datas = []
+        val_datas = []
+        min_sample_num = sys.maxsize
+        for dataset_singe in args.datasets.split(','):
+            print(dataset_singe)
+            args.data = config['datasets'][dataset_singe].data
+            args.root_path = config['datasets'][dataset_singe].root_path
+            args.data_path = config['datasets'][dataset_singe].data_path
+            args.data_name = config['datasets'][dataset_singe].data_name
+            args.features = config['datasets'][dataset_singe].features
+            args.freq = config['datasets'][dataset_singe].freq
+            args.target = config['datasets'][dataset_singe].target
+            if args.freq == 0:
+                args.freq = 'h'
+
+            print("dataset: ", args.data)
+            train_data, train_loader = data_provider(args, 'train')
+            if dataset_singe not in ['ETTh1', 'ETTh2', 'ILI', 'exchange']:
+                min_sample_num = min(min_sample_num, len(train_data))
+
+            # args.percent = 20
+            vali_data, vali_loader = data_provider(args, 'val')
+            # args.percent = 100
+
+            # train_datas.append(train_data)
+            val_datas.append(vali_data)
+
+        for dataset_singe in args.datasets.split(','):
+            print(dataset_singe)
+            args.data = config['datasets'][dataset_singe].data
+            args.root_path = config['datasets'][dataset_singe].root_path
+            args.data_path = config['datasets'][dataset_singe].data_path
+            args.data_name = config['datasets'][dataset_singe].data_name
+            args.features = config['datasets'][dataset_singe].features
+            args.freq = config['datasets'][dataset_singe].freq
+            args.target = config['datasets'][dataset_singe].target
+            if args.freq == 0:
+                args.freq = 'h'
+
+            print("dataset: ", args.data)
+            train_data, train_loader = data_provider(args, 'train')
+            if dataset_singe not in ['ETTh1', 'ETTh2', 'ILI', 'exchange'] and args.equal == 1:
+                train_data = Subset(train_data, choice(len(train_data), min_sample_num))
+            if args.electri_multiplier > 1 and args.equal == 1 and dataset_singe in ['electricity']:
+                train_data = Subset(train_data, choice(len(train_data), int(min_sample_num * args.electri_multiplier)))
+            if args.traffic_multiplier > 1 and args.equal == 1 and dataset_singe in ['traffic']:
+                train_data = Subset(train_data, choice(len(train_data), int(min_sample_num * args.traffic_multiplier)))
+            train_datas.append(train_data)
+
+        if len(train_datas) > 1:
+            train_data = torch.utils.data.ConcatDataset([train_datas[0], train_datas[1]])
+            vali_data = torch.utils.data.ConcatDataset([val_datas[0], val_datas[1]])
+            for i in range(2, len(train_datas)):
+                train_data = torch.utils.data.ConcatDataset([train_data, train_datas[i]])
+
+                vali_data = torch.utils.data.ConcatDataset([vali_data, val_datas[i]])
+
+            # import pdb; pdb.set_trace()
+            print("Way1", len(train_data))
+
+        train_loader = torch.utils.data.DataLoader(train_data, batch_size=args.batch_size, shuffle=True,
+                                                    num_workers=args.num_workers)
+        vali_loader = torch.utils.data.DataLoader(vali_data, batch_size=args.batch_size, shuffle=False,
+                                                    num_workers=args.num_workers)
+
+        args.data = config['datasets'][args.target_data].data
+        args.root_path = config['datasets'][args.target_data].root_path
+        args.data_path = config['datasets'][args.target_data].data_path
+        args.data_name = config['datasets'][args.target_data].data_name
         args.features = config['datasets'][dataset_singe].features
-        args.freq = config['datasets'][dataset_singe].freq
-        args.target = config['datasets'][dataset_singe].target
+        args.freq = config['datasets'][args.target_data].freq
+        args.target = config['datasets'][args.target_data].target
         if args.freq == 0:
             args.freq = 'h'
-
-        print("dataset: ", args.data)
-        train_data, train_loader = data_provider(args, 'train')
-        if dataset_singe not in ['ETTh1', 'ETTh2', 'ILI', 'exchange']:
-            min_sample_num = min(min_sample_num, len(train_data))
-
-        # args.percent = 20
-        vali_data, vali_loader = data_provider(args, 'val')
-        # args.percent = 100
-
-        # train_datas.append(train_data)
-        val_datas.append(vali_data)
-
-    for dataset_singe in args.datasets.split(','):
-        print(dataset_singe)
-        args.data = config['datasets'][dataset_singe].data
-        args.root_path = config['datasets'][dataset_singe].root_path
-        args.data_path = config['datasets'][dataset_singe].data_path
-        args.data_name = config['datasets'][dataset_singe].data_name
-        args.features = config['datasets'][dataset_singe].features
-        args.freq = config['datasets'][dataset_singe].freq
-        args.target = config['datasets'][dataset_singe].target
-        if args.freq == 0:
-            args.freq = 'h'
-
-        print("dataset: ", args.data)
-        train_data, train_loader = data_provider(args, 'train')
-        if dataset_singe not in ['ETTh1', 'ETTh2', 'ILI', 'exchange'] and args.equal == 1:
-            train_data = Subset(train_data, choice(len(train_data), min_sample_num))
-        if args.electri_multiplier > 1 and args.equal == 1 and dataset_singe in ['electricity']:
-            train_data = Subset(train_data, choice(len(train_data), int(min_sample_num * args.electri_multiplier)))
-        if args.traffic_multiplier > 1 and args.equal == 1 and dataset_singe in ['traffic']:
-            train_data = Subset(train_data, choice(len(train_data), int(min_sample_num * args.traffic_multiplier)))
-        train_datas.append(train_data)
-
-    if len(train_datas) > 1:
-        train_data = torch.utils.data.ConcatDataset([train_datas[0], train_datas[1]])
-        vali_data = torch.utils.data.ConcatDataset([val_datas[0], val_datas[1]])
-        for i in range(2, len(train_datas)):
-            train_data = torch.utils.data.ConcatDataset([train_data, train_datas[i]])
-
-            vali_data = torch.utils.data.ConcatDataset([vali_data, val_datas[i]])
-
-        # import pdb; pdb.set_trace()
-        print("Way1", len(train_data))
-
-    train_loader = torch.utils.data.DataLoader(train_data, batch_size=args.batch_size, shuffle=True,
-                                                num_workers=args.num_workers)
-    vali_loader = torch.utils.data.DataLoader(vali_data, batch_size=args.batch_size, shuffle=False,
-                                                num_workers=args.num_workers)
-
-    args.data = config['datasets'][args.target_data].data
-    args.root_path = config['datasets'][args.target_data].root_path
-    args.data_path = config['datasets'][args.target_data].data_path
-    args.data_name = config['datasets'][args.target_data].data_name
-    args.features = config['datasets'][dataset_singe].features
-    args.freq = config['datasets'][args.target_data].freq
-    args.target = config['datasets'][args.target_data].target
-    if args.freq == 0:
-        args.freq = 'h'
-    test_data, test_loader = data_provider(args, 'test')
+        test_data, test_loader = data_provider(args, 'test')
 
 
-    if args.model == 'ST_TimeLLM_1':
-        model = ST_TimeLLM_1.Model(args).float()
-    elif args.model == 'ST_TimeLLM_2':
-        model = ST_TimeLLM_2.Model(args).float()
+        if args.model == 'ST_TimeLLM_1':
+            model = ST_TimeLLM_1.Model(args).float()
+        elif args.model == 'ST_TimeLLM_2':
+            model = ST_TimeLLM_2.Model(args).float()
 
-    path = os.path.join(args.checkpoints,
-                        setting + '-' + args.model_comment)  # unique checkpoint saving path
-    args.content = load_content(args)
-    os.makedirs(path, exist_ok=True)
-    time_now = time.time()
+        path = os.path.join(args.checkpoints,
+                            setting + '-' + args.model_comment)  # unique checkpoint saving path
+        args.content = load_content(args)
+        os.makedirs(path, exist_ok=True)
+        time_now = time.time()
 
-    train_steps = len(train_loader)
-    early_stopping = EarlyStopping(patience=args.patience)
+        train_steps = len(train_loader)
+        early_stopping = EarlyStopping(patience=args.patience)
 
-    trained_parameters = []
-    for p in model.parameters():
-        if p.requires_grad is True:
-            trained_parameters.append(p)
+        trained_parameters = []
+        for p in model.parameters():
+            if p.requires_grad is True:
+                trained_parameters.append(p)
 
-    model_optim = optim.Adam(trained_parameters, lr=args.learning_rate)
+        model_optim = optim.Adam(trained_parameters, lr=args.learning_rate)
 
-    if args.lradj == 'COS':
-        scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(model_optim, T_max=20, eta_min=1e-8)
-    else:
-        scheduler = lr_scheduler.OneCycleLR(optimizer=model_optim,
-                                            steps_per_epoch=train_steps,
-                                            pct_start=args.pct_start,
-                                            epochs=args.train_epochs,
-                                            max_lr=args.learning_rate)
-
-    criterion = nn.MSELoss()
-    mae_metric = nn.L1Loss()
-
-    save_epochs = [0, 2, 5, 10, 100]
-    train_loader, vali_loader, test_loader, model, model_optim, scheduler = accelerator.prepare(train_loader, vali_loader, test_loader, model, model_optim, scheduler)
-
-    for epoch in save_epochs:
-        #here epoch = 100 means the final svaed model(best model)
-        if epoch != 100:
-            model_path = path + '/' + '_epoch_' + str(epoch) + 'checkpoint'
+        if args.lradj == 'COS':
+            scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(model_optim, T_max=20, eta_min=1e-8)
         else:
-            model_path = path + '/' + 'checkpoint'
-        #new_state_dict = {'module.' + k: v for k, v in state_dict.items()}
-        accelerator.wait_for_everyone()
-        unwrapped_model = accelerator.unwrap_model(model)
-        torch.cuda.synchronize()
-        torch.cuda.empty_cache()
-        unwrapped_model.load_state_dict(torch.load(model_path, map_location=lambda storage, loc: storage))
+            scheduler = lr_scheduler.OneCycleLR(optimizer=model_optim,
+                                                steps_per_epoch=train_steps,
+                                                pct_start=args.pct_start,
+                                                epochs=args.train_epochs,
+                                                max_lr=args.learning_rate)
 
-        model.eval()
-        batch_x, batch_y, batch_x_mark, batch_y_mark, seq_trend, seq_seasonal, seq_resid = next(iter(test_loader))
-        model_optim.zero_grad()
-        batch_x = batch_x.float().to(accelerator.device)
-        batch_y = batch_y.float().to(accelerator.device)
-        batch_x_mark = batch_x_mark.float().to(accelerator.device)
-        batch_y_mark = batch_y_mark.float().to(accelerator.device)
-        seq_trend = seq_trend.float().to(accelerator.device)
-        seq_seasonal = seq_seasonal.float().to(accelerator.device)
-        seq_resid = seq_resid.float().to(accelerator.device)
-        # decoder input
-        dec_inp = torch.zeros_like(batch_y[:, -args.pred_len:, :]).float().to(accelerator.device)
-        dec_inp = torch.cat([batch_y[:, :args.label_len, :], dec_inp], dim=1).float().to(accelerator.device)
-        sample = batch_x[0, :, 0]  # Shape will be (length,)
-        sample_trend = seq_trend[0, :, 0]
-        sample_seasonal = seq_seasonal[0, :, 0]
-        sample_resid = seq_resid[0, :, 0]
-        # Plot the time series
-        plot_input(path, sample, 'input.png')
-        plot_input(path,sample_trend, 'input_trend.png')
-        plot_input(path,sample_seasonal, 'input_seasonal.png')
-        plot_input(path,sample_resid, 'input_resid.png')
+        criterion = nn.MSELoss()
+        mae_metric = nn.L1Loss()
 
-        _, attn_map_list = model(batch_x, batch_x_mark, dec_inp, batch_y_mark, seq_trend, seq_seasonal, seq_resid)
-        if args.decomp_level == 1:
-            num_attn_map = {'attn_original': attn_map_list[0]}
-        elif args.decomp_level == 2:
-            num_attn_map = {'attn_seasonal': attn_map_list[0], 'attn_trend': attn_map_list[1]}
-        elif args.decomp_level == 3:
-            num_attn_map = {'attn_seasonal': attn_map_list[0], 'attn_trend': attn_map_list[1], 'attn_residual': attn_map_list[2]}
+        save_epochs = [0, 2, 5, 10, 100]
+        train_loader, vali_loader, test_loader, model, model_optim, scheduler = accelerator.prepare(train_loader, vali_loader, test_loader, model, model_optim, scheduler)
 
-        for k, v in num_attn_map.items():
-            print("v in num_attn_map.items(): ", str(k))
-            attn_heads_fused = v.mean(axis=1).mean(axis=0)
-            # Create a heatmap
-            plt.figure(figsize=(4, 20))  # Increase figure width to better display all columns
-            sns.heatmap(attn_heads_fused.cpu().detach().numpy(), cmap='viridis', linewidths=0)# Adjust the aspect ratio by setting the aspect of the Axes object
-            plt.gca().set_aspect('auto')
-            # Save the plot to a local path
-            output_path = path + '/' + str(k) + '_heatmap_epoch_' + str(epoch) + '.png'
-            plt.savefig(output_path, dpi=300, bbox_inches='tight')
+        for epoch in save_epochs:
+            #here epoch = 100 means the final svaed model(best model)
+            if epoch != 100:
+                model_path = path + '/' + '_epoch_' + str(epoch) + 'checkpoint'
+            else:
+                model_path = path + '/' + 'checkpoint'
+            #new_state_dict = {'module.' + k: v for k, v in state_dict.items()}
+            accelerator.wait_for_everyone()
+            unwrapped_model = accelerator.unwrap_model(model)
+            torch.cuda.synchronize()
+            torch.cuda.empty_cache()
+            unwrapped_model.load_state_dict(torch.load(model_path, map_location=lambda storage, loc: storage))
+
+            model.eval()
+            batch_x, batch_y, batch_x_mark, batch_y_mark, seq_trend, seq_seasonal, seq_resid = next(iter(test_loader))
+            model_optim.zero_grad()
+            batch_x = batch_x.float().to(accelerator.device)
+            batch_y = batch_y.float().to(accelerator.device)
+            batch_x_mark = batch_x_mark.float().to(accelerator.device)
+            batch_y_mark = batch_y_mark.float().to(accelerator.device)
+            seq_trend = seq_trend.float().to(accelerator.device)
+            seq_seasonal = seq_seasonal.float().to(accelerator.device)
+            seq_resid = seq_resid.float().to(accelerator.device)
+            # decoder input
+            dec_inp = torch.zeros_like(batch_y[:, -args.pred_len:, :]).float().to(accelerator.device)
+            dec_inp = torch.cat([batch_y[:, :args.label_len, :], dec_inp], dim=1).float().to(accelerator.device)
+            sample = batch_x[0, :, 0]  # Shape will be (length,)
+            sample_trend = seq_trend[0, :, 0]
+            sample_seasonal = seq_seasonal[0, :, 0]
+            sample_resid = seq_resid[0, :, 0]
+            # Plot the time series
+            plot_input(path, sample, 'input.png')
+            plot_input(path,sample_trend, 'input_trend.png')
+            plot_input(path,sample_seasonal, 'input_seasonal.png')
+            plot_input(path,sample_resid, 'input_resid.png')
+
+            _, attn_map_list = model(batch_x, batch_x_mark, dec_inp, batch_y_mark, seq_trend, seq_seasonal, seq_resid)
+            if args.decomp_level == 1:
+                num_attn_map = {'attn_original': attn_map_list[0]}
+            elif args.decomp_level == 2:
+                num_attn_map = {'attn_seasonal': attn_map_list[0], 'attn_trend': attn_map_list[1]}
+            elif args.decomp_level == 3:
+                num_attn_map = {'attn_seasonal': attn_map_list[0], 'attn_trend': attn_map_list[1], 'attn_residual': attn_map_list[2]}
+
+            for k, v in num_attn_map.items():
+                print("v in num_attn_map.items(): ", str(k))
+                attn_heads_fused = v.mean(axis=1).mean(axis=0)
+                # Create a heatmap
+                plt.figure(figsize=(4, 20))  # Increase figure width to better display all columns
+                sns.heatmap(attn_heads_fused.cpu().detach().numpy(), cmap='viridis', linewidths=0)# Adjust the aspect ratio by setting the aspect of the Axes object
+                plt.gca().set_aspect('auto')
+                # Save the plot to a local path
+                output_path = path + '/' + str(k) + '_heatmap_epoch_' + str(epoch) + '.png'
+                plt.savefig(output_path, dpi=300, bbox_inches='tight')
 
 
 
