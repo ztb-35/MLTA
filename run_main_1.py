@@ -220,6 +220,8 @@ for ii in range(args.itr):
         model = ST_TimeLLM_1.Model(args).float()
     elif args.model == 'ST_TimeLLM_2':
         model = ST_TimeLLM_2.Model(args).float()
+    elif args.model == 'ST_TimeLLM_3':
+        model = ST_TimeLLM_3.Model(args).float()
     elif args.model == 'TEMPO':
         model = TEMPO.TEMPO(args).float()
 
