@@ -432,7 +432,7 @@ class Model(nn.Module):
                 if k == 'trend':
                     source_embeddings = trend_embedding
                     if self.align_text:
-                        components_out, attn_trend_map = self.reprogramming_layer(v, source_embeddings,
+                        components_out, attn_map = self.reprogramming_layer(v, source_embeddings,
                                                                                   source_embeddings)
                         llama_components_out = torch.cat([prompt_embeddings, prompt_trend, components_out], dim=1)
                     else:
@@ -451,7 +451,7 @@ class Model(nn.Module):
                         llama_components_out = torch.cat([prompt_embeddings, prompt_residual, components_out], dim=1)
                     else:
                         llama_components_out = torch.cat([prompt_embeddings, prompt_residual, v], dim=1)
-                attn_map_list.append(attn_trend_map)
+                attn_map_list.append(attn_map)
             dec_components_out = self.llm_model(inputs_embeds=llama_components_out).last_hidden_state
             dec_components_out = dec_components_out[:, :, :self.d_ff]
             dec_components_out = torch.reshape(
