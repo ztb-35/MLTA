@@ -1,16 +1,15 @@
 #!/bin/bash
 #SBATCH -N 1
 #SBATCH -t 72:00:00
-#SBATCH -p gpu
-#SBATCH -n 48#one GPU, n<16
-#SBATCH -A hpc_sundeepby4
-#SBATCH -o /work/tzhao3/TimeLLM/Reprogramming-multi-level-time-series-forecasting-by-LLMs/job/alation_study/no_domain_feature_out # File name for stdout
-#SBATCH -e /work/tzhao3/TimeLLM/Reprogramming-multi-level-time-series-forecasting-by-LLMs/job/alation_study/no_domain_feature_error # File name for error
+#SBATCH -p gpu4
+#SBATCH -n 64#one GPU, n<16
+#SBATCH -A hpc_sunsmic2
+#SBATCH -o /project/tzhao3/TimeLLM_git_clone/Reprogramming-multi-level-time-series-forecasting-by-LLMs/job/alation_study/no_domain_feature_out # File name for stdout
+#SBATCH -e /project/tzhao3/TimeLLM_git_clone/Reprogramming-multi-level-time-series-forecasting-by-LLMs/job/alation_study/no_domain_feature_error # File name for error
 #SBATCH --mail-type END # Send email when job ends
 #SBATCH --mail-user tzhao3@lsu.edu # Send mail to this address
-#SBATCH --gres=gpu:2
-#job on deepbayou
-
+#SBATCH --gres=gpu:4
+#job on super mike3
 
 model_name=ST_TimeLLM_3
 d_model=32
