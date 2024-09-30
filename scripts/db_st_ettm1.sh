@@ -17,16 +17,16 @@ d_model=32
 d_ff=128
 train_epochs=50
 seq_len=512
-learning_rate=0.001
+learning_rate=0.0001
 patience=4
 llama_layers=6
 num_process=2
 batch_size=48
 eval_batch_size=48
 n_heads=8
-percent=100
+percent=10
 decomp_level=3
-decomp_method='STL'
+decomp_method='moving_avg'
 comment='1'
 
 
