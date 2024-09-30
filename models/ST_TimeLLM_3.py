@@ -192,9 +192,9 @@ class Model(nn.Module):
 
         self.word_embeddings = self.llm_model.get_input_embeddings().weight
         self.vocab_size = self.word_embeddings.shape[0]
-        self.num_tokens = 100
+        self.num_tokens = 1000
         self.num_tokens_trend = 10
-        self.num_tokens_seasonal = 10
+        self.num_tokens_seasonal = 100
         self.mapping_layer = nn.Linear(self.vocab_size, self.num_tokens)
         self.mapping_layer_trend = nn.Linear(self.vocab_size, self.num_tokens_trend)
         self.mapping_layer_seasonal = nn.Linear(self.vocab_size, self.num_tokens_seasonal)
@@ -221,10 +221,11 @@ class Model(nn.Module):
 
         self.normalize_layers = Normalize(configs.enc_in, affine=False)
 
-    def forward(self, x_enc, x_mark_enc, x_dec, x_mark_dec, mask=None):
+    def forward(self, x_enc, x_mark_enc, x_dec, x_mark_dec, seq_trend, seq_seasonal, seq_resid, mask=None):
         if self.task_name == 'long_term_forecast' or self.task_name == 'short_term_forecast':
             if self.align_text:
-                dec_out, attn_map_list = self.forecast(x_enc, x_mark_enc, x_dec, x_mark_dec)
+                dec_out, attn_map_list = self.forecast(x_enc, x_mark_enc, x_dec, x_mark_dec, seq_trend, seq_seasonal,
+                                                       seq_resid)
                 # accelerator.print("args.output_attn_map is " + str(self.output_attn_map))
                 if self.output_attn_map:
                     return dec_out[:, -self.pred_len:,
@@ -232,7 +233,7 @@ class Model(nn.Module):
                 else:
                     return dec_out[:, -self.pred_len:, :]
             else:
-                dec_out = self.forecast(x_enc, x_mark_enc, x_dec, x_mark_dec)
+                dec_out = self.forecast(x_enc, x_mark_enc, x_dec, x_mark_dec, seq_trend, seq_seasonal, seq_resid)
                 return dec_out[:, -self.pred_len:, :]
         return None
 
@@ -254,7 +255,7 @@ class Model(nn.Module):
 
         return x, n_vars
 
-    def forecast(self, x_enc, x_mark_enc, x_dec, x_mark_dec):
+    def forecast(self, x_enc, x_mark_enc, x_dec, x_mark_dec, seq_trend, seq_seasonal, seq_resid):
 
         x_enc = self.normalize_layers(x_enc, 'norm')
 
@@ -352,6 +353,14 @@ class Model(nn.Module):
             # trend_out = self.in_layer_trend(trend_out)
             # seasonal_out = self.in_layer_seasonal(seasonal_out)
             components = {'seasonal_resid': seasonal_out, 'trend': trend_out}
+        elif self.decomp_method == 'STL':
+            trend_init, means_trend, stdev_trend = self.get_norm(seq_trend)
+            seasonal_init, means_seasonal, stdev_seasonal = self.get_norm(seq_seasonal)
+            residual_init, means_seasonal, stdev_seasonal = self.get_norm(seq_resid)
+            seasonal_out, n_vars = self.patch_embedding(seasonal_init.permute(0, 2, 1).contiguous())
+            trend_out, n_vars = self.patch_embedding(trend_init.permute(0, 2, 1).contiguous())
+            residual_out, n_vars = self.patch_embedding(residual_init.permute(0, 2, 1).contiguous())
+            components = {'seasonal': seasonal_out, 'trend': trend_out, 'residual': residual_out}
         elif self.decomp_method == 'TEMPO':
             trend_init = self.moving_avg(x_enc)
             trend_init = self.map_trend(trend_init)
@@ -381,6 +390,7 @@ class Model(nn.Module):
                     if self.align_text:
                         components_out, attn_map = self.reprogramming_layer(v, source_embeddings, source_embeddings)
                         llama_components_out = torch.cat([prompt_trend, components_out], dim=1)
+                        attn_map_list.append(attn_map)
                     else:
                         llama_components_out = torch.cat([prompt_trend, v], dim=1)
                 elif k == 'seasonal':
@@ -388,6 +398,7 @@ class Model(nn.Module):
                     if self.align_text:
                         components_out, attn_map = self.reprogramming_layer(v, source_embeddings, source_embeddings)
                         llama_components_out = torch.cat([prompt_seasonal, components_out], dim=1)
+                        attn_map_list.append(attn_map)
                     else:
                         llama_components_out = torch.cat([prompt_seasonal, v], dim=1)
                 elif k == 'residual' or k == 'seasonal_resid':
@@ -395,6 +406,7 @@ class Model(nn.Module):
                     if self.align_text:
                         components_out, attn_map = self.reprogramming_layer(v, source_embeddings, source_embeddings)
                         llama_components_out = torch.cat([prompt_residual, components_out], dim=1)
+                        attn_map_list.append(attn_map)
                     else:
                         llama_components_out = torch.cat([prompt_residual, v], dim=1)
                 elif k == 'original':
@@ -402,9 +414,9 @@ class Model(nn.Module):
                     if self.align_text:
                         components_out, attn_map = self.reprogramming_layer(v, source_embeddings, source_embeddings)
                         llama_components_out = torch.cat([prompt_original, components_out], dim=1)
+                        attn_map_list.append(attn_map)
                     else:
                         llama_components_out = torch.cat([prompt_original, v], dim=1)
-                attn_map_list.append(attn_map)
                 dec_components_out = self.llm_model(inputs_embeds=llama_components_out).last_hidden_state
                 dec_components_out = dec_components_out[:, :, :self.d_ff]
                 dec_components_out = torch.reshape(
@@ -422,23 +434,23 @@ class Model(nn.Module):
                     if self.align_text:
                         components_out, attn_trend_map = self.reprogramming_layer(v, source_embeddings,
                                                                                   source_embeddings)
-                        llama_components_out = torch.cat([prompt_embeddings, components_out], dim=1)
+                        llama_components_out = torch.cat([prompt_embeddings, prompt_trend, components_out], dim=1)
                     else:
-                        llama_components_out = torch.cat([prompt_embeddings, v], dim=1)
+                        llama_components_out = torch.cat([prompt_embeddings, prompt_trend, v], dim=1)
                 elif k == 'seasonal':
                     source_embeddings = source_embeddings_seasonal
                     if self.align_text:
                         components_out, attn_map = self.reprogramming_layer(v, source_embeddings, source_embeddings)
-                        llama_components_out = torch.cat([prompt_embeddings, components_out], dim=1)
+                        llama_components_out = torch.cat([prompt_embeddings, prompt_seasonal, components_out], dim=1)
                     else:
-                        llama_components_out = torch.cat([prompt_embeddings, v], dim=1)
+                        llama_components_out = torch.cat([prompt_embeddings, prompt_seasonal, v], dim=1)
                 elif k == 'residual' or k == 'seasonal_resid':
                     source_embeddings = source_embeddings_original
                     if self.align_text:
                         components_out, attn_map = self.reprogramming_layer(v, source_embeddings, source_embeddings)
-                        llama_components_out = torch.cat([prompt_embeddings, components_out], dim=1)
+                        llama_components_out = torch.cat([prompt_embeddings, prompt_residual, components_out], dim=1)
                     else:
-                        llama_components_out = torch.cat([prompt_embeddings, v], dim=1)
+                        llama_components_out = torch.cat([prompt_embeddings, prompt_residual, v], dim=1)
                 attn_map_list.append(attn_trend_map)
             dec_components_out = self.llm_model(inputs_embeds=llama_components_out).last_hidden_state
             dec_components_out = dec_components_out[:, :, :self.d_ff]
