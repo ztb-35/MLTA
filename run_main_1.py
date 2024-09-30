@@ -6,7 +6,7 @@ from torch import nn, optim
 from torch.optim import lr_scheduler
 from tqdm import tqdm
 
-from models import Autoformer, DLinear, TimeLLM, TEMPO, ST_TimeLLM_1, ST_TimeLLM_2
+from models import Autoformer, DLinear, TimeLLM, TEMPO, ST_TimeLLM_1, ST_TimeLLM_2, ST_TimeLLM_3
 
 from data_provider.data_factory_tempo import data_provider
 import time
