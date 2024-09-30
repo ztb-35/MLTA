@@ -1,23 +1,25 @@
 from math import sqrt
-
 import torch
 import torch.nn as nn
+import numpy as np
 from einops import rearrange
-
+from peft import get_peft_model
 from transformers import LlamaConfig, LlamaModel, LlamaTokenizer, GPT2Config, GPT2Model, GPT2Tokenizer, BertConfig, \
     BertModel, BertTokenizer
 from layers.Embed import PatchEmbedding
 import transformers
 from layers.StandardNorm import Normalize
-from layers.Autoformer_EncDec import Encoder, Decoder, EncoderLayer, DecoderLayer, my_Layernorm, series_decomp, moving_avg
+from layers.Autoformer_EncDec import Encoder, Decoder, EncoderLayer, DecoderLayer, my_Layernorm, series_decomp, \
+    moving_avg
+
+transformers.logging.set_verbosity_error()
 from accelerate import Accelerator, DeepSpeedPlugin
 from accelerate import DistributedDataParallelKwargs
+
 transformers.logging.set_verbosity_error()
 
 ddp_kwargs = DistributedDataParallelKwargs(find_unused_parameters=True)
 accelerator = Accelerator(kwargs_handlers=[ddp_kwargs])
-
-transformers.logging.set_verbosity_error()
 
 
 class FlattenHead(nn.Module):
@@ -47,18 +49,15 @@ class Model(nn.Module):
         self.d_llm = configs.llm_dim
         self.patch_len = configs.patch_len
         self.stride = configs.stride
+        self.output_attn_map = configs.output_attn_map
+        self.decomp_method = configs.decomp_method
+        self.decomp_level = configs.decomp_level
+        self.align_text = configs.align_text
+        self.combination = configs.combination
         # Decomp
         kernel_size = configs.moving_avg
-        self.map_trend = nn.Linear(configs.seq_len, configs.seq_len)
-        self.map_season  = nn.Sequential(
-            nn.Linear(configs.seq_len, 4*configs.seq_len),
-            nn.ReLU(),
-            nn.Linear(4*configs.seq_len, configs.seq_len)
-        )
-
-
-        self.moving_avg = moving_avg(kernel_size, stride=1)
         self.decomp = series_decomp(kernel_size)
+
         if configs.llm_model == 'LLAMA':
             # self.llama_config = LlamaConfig.from_pretrained('/mnt/alps/modelhub/pretrained_model/LLaMA/7B_hf/')
             self.llama_config = LlamaConfig.from_pretrained('huggyllama/llama-7b')
@@ -76,8 +75,7 @@ class Model(nn.Module):
                 )
             except EnvironmentError:  # downloads model from HF is not already done
                 print("Local model files not found. Attempting to download...")
-                self.llm_model = LlamaModel.from_pretrained(
-                    # "/mnt/alps/modelhub/pretrained_model/LLaMA/7B_hf/",
+                self.llm_model = LlamaModel.from_pretrained(  # "/mnt/alps/modelhub/pretrained_model/LLaMA/7B_hf/",
                     'huggyllama/llama-7b',
                     trust_remote_code=True,
                     local_files_only=False,
@@ -200,12 +198,21 @@ class Model(nn.Module):
         self.mapping_layer = nn.Linear(self.vocab_size, self.num_tokens)
         self.mapping_layer_trend = nn.Linear(self.vocab_size, self.num_tokens_trend)
         self.mapping_layer_seasonal = nn.Linear(self.vocab_size, self.num_tokens_seasonal)
-
+        self.in_layer_trend = nn.Linear(configs.patch_len, configs.llm_dim)
+        self.components_embed = nn.Linear(configs.d_model, configs.llm_dim)
+        self.in_layer_seasonal = nn.Linear(configs.patch_len, configs.llm_dim)
+        self.in_layer_residual = nn.Linear(configs.patch_len, configs.llm_dim)
+        self.map_trend = nn.Linear(configs.seq_len, configs.seq_len)
+        self.map_season = nn.Sequential(
+            nn.Linear(configs.seq_len, 4 * configs.seq_len),
+            nn.ReLU(),
+            nn.Linear(4 * configs.seq_len, configs.seq_len)
+        )
+        self.padding_patch_layer = nn.ReplicationPad1d((0, self.stride))
+        self.moving_avg = moving_avg(kernel_size, stride=self.stride)
         self.reprogramming_layer = ReprogrammingLayer(configs.d_model, configs.n_heads, self.d_ff, self.d_llm)
-
         self.patch_nums = int((configs.seq_len - self.patch_len) / self.stride + 2)
         self.head_nf = self.d_ff * self.patch_nums
-
         if self.task_name == 'long_term_forecast' or self.task_name == 'short_term_forecast':
             self.output_projection = FlattenHead(configs.enc_in, self.head_nf, self.pred_len,
                                                  head_dropout=configs.dropout)
@@ -214,120 +221,248 @@ class Model(nn.Module):
 
         self.normalize_layers = Normalize(configs.enc_in, affine=False)
 
-    def forward(self, x_enc, x_mark_enc, x_dec, x_mark_dec, mask=None):
+    def forward(self, x_enc, x_mark_enc, x_dec, x_mark_dec, seq_trend, seq_seasonal, seq_resid, mask=None):
         if self.task_name == 'long_term_forecast' or self.task_name == 'short_term_forecast':
-            dec_out = self.forecast(x_enc, x_mark_enc, x_dec, x_mark_dec)
-            return dec_out[:, -self.pred_len:, :]
+            if self.align_text:
+                dec_out, attn_map_list = self.forecast(x_enc, x_mark_enc, x_dec, x_mark_dec, seq_trend, seq_seasonal,
+                                                       seq_resid)
+                # accelerator.print("args.output_attn_map is " + str(self.output_attn_map))
+                if self.output_attn_map:
+                    return dec_out[:, -self.pred_len:,
+                           :], attn_map_list  # attn_map in order of seasonal, trend, residual
+                else:
+                    return dec_out[:, -self.pred_len:, :]
+            else:
+                dec_out = self.forecast(x_enc, x_mark_enc, x_dec, x_mark_dec, seq_trend, seq_seasonal, seq_resid)
+                return dec_out[:, -self.pred_len:, :]
         return None
 
-    def forecast(self, x_enc, x_mark_enc, x_dec, x_mark_dec):
+    def get_norm(self, x, d='norm'):
+        # if d == 'norm':
+        means = x.mean(1, keepdim=True).detach()
+        x = x - means
+        stdev = torch.sqrt(torch.var(x, dim=1, keepdim=True, unbiased=False) + 1e-5).detach()
+        x /= stdev
+
+        return x, means, stdev
+
+    def get_patch(self, x):
+        # x = rearrange(x, 'b l m -> b m l')
+        n_vars = x.shape[1]
+        x = self.padding_patch_layer(x)  # 4, 1, 420
+        x = x.unfold(dimension=-1, size=self.patch_len, step=self.stride)  # 4,1, 64, 16
+        x = rearrange(x, 'b m n p -> (b m) n p')  # 4, 64, 16
+
+        return x, n_vars
+
+    def forecast(self, x_enc, x_mark_enc, x_dec, x_mark_dec, seq_trend, seq_seasonal, seq_resid):
 
         x_enc = self.normalize_layers(x_enc, 'norm')
+
         B, T, N = x_enc.size()
         x_enc = x_enc.permute(0, 2, 1).contiguous().reshape(B * N, T, 1)
 
         min_values = torch.min(x_enc, dim=1)[0]
         max_values = torch.max(x_enc, dim=1)[0]
         medians = torch.median(x_enc, dim=1).values
+        means = torch.mean(x_enc, dim=1)
+        vars = torch.var(x_enc, dim=1)
         lags = self.calcute_lags(x_enc)
         trends = x_enc.diff(dim=1).sum(dim=1)
-
+        slope = x_enc.diff(dim=1).mean(dim=1)
         prompt = []
+        prompt_trend = []
+        prompt_residual = []
+        prompt_seasonal = []
+        prompt_original = []
         for b in range(x_enc.shape[0]):
             min_values_str = str(min_values[b].tolist()[0])
             max_values_str = str(max_values[b].tolist()[0])
             median_values_str = str(medians[b].tolist()[0])
+            mean_values_str = str(means[b].tolist()[0])
+            var_values_str = str(vars[b].tolist()[0])
+            slope_values_str = str(slope[b].tolist()[0])
             lags_values_str = str(lags[b].tolist())
             prompt_ = (
                 f"<|start_prompt|>Dataset description: {self.description}"
-                f"Task description: forecast the next {str(self.pred_len)} steps given the previous {str(self.seq_len)} steps trend, seasonal and noise components; "
-                "Input statistics of the original time series data: "
+                "Input statistics: "
                 f"min value {min_values_str}, "
                 f"max value {max_values_str}, "
                 f"median value {median_values_str}, "
-                f"the trend of input is {'upward' if trends[b] > 0 else 'downward'}, "
+                f"mean value {mean_values_str}, "
+                f"variances value {var_values_str}, "
+                f"the trend of input is {'upward' if trends[b] > 0 else 'downward'} with slope as {slope_values_str}, "
                 f"top 5 lags are : {lags_values_str}<|<end_prompt>|>"
             )
 
             prompt.append(prompt_)
 
-        x_enc = x_enc.permute(0, 2, 1).contiguous()
-        trend_init = self.moving_avg(x_enc)
-        trend_init = self.map_trend(trend_init.squeeze()).unsqueeze(2)
-        trend_init = rearrange(trend_init, 'b l m -> b m l')
-        seasonal_init = x_enc - trend_init
-        seasonal_init = self.map_season(seasonal_init.squeeze().unsqueeze(1)).squeeze(1).unsqueeze(2)
-        seasonal_init = rearrange(seasonal_init, 'b l m -> b m l')
-        residual_init = x_enc - trend_init - seasonal_init
+            prompt_trend_ = (f"Task description: forecast the next {str(self.pred_len)} steps given the previous {str(self.seq_len)} steps trend")
+            prompt_residual_ = (f"Task description: forecast the next {str(self.pred_len)} steps given the previous {str(self.seq_len)} steps residual")
+            prompt_seasonal_ = (f"Task description: forecast the next {str(self.pred_len)} steps given the previous {str(self.seq_len)} steps seasonal")
+            prompt_original_ = (f"Task description: forecast the next {str(self.pred_len)} steps given the previous {str(self.seq_len)} steps")
+            prompt_trend.append(prompt_trend_)
+            prompt_residual.append(prompt_residual_)
+            prompt_seasonal.append(prompt_seasonal_)
+            prompt_original.append(prompt_original_)
 
-        #seasonal_init, trend_init = self.decomp(x_enc)
+        x_enc = x_enc.reshape(B, N, T).permute(0, 2, 1).contiguous()
+
         prompt = self.tokenizer(prompt, return_tensors="pt", padding=True, truncation=True, max_length=2048).input_ids
+        prompt_trend_ = self.tokenizer(prompt_trend, return_tensors="pt",padding=True, truncation=True, max_length=2048).input_ids
+        prompt_seasonal_ = self.tokenizer(prompt_seasonal, return_tensors="pt",padding=True,truncation=True, max_length=2048).input_ids
+        prompt_residual_ = self.tokenizer(prompt_residual, return_tensors="pt",padding=True,truncation=True, max_length=2048).input_ids
+        prompt_original_ = self.tokenizer(prompt_original, return_tensors="pt", padding=True, truncation=True,
+                                          max_length=2048).input_ids
+        prompt_trend = self.llm_model.get_input_embeddings()(prompt_trend_.to(x_enc.device))
+        prompt_seasonal = self.llm_model.get_input_embeddings()(prompt_seasonal_.to(x_enc.device))
+        prompt_residual = self.llm_model.get_input_embeddings()(prompt_residual_.to(x_enc.device))
+        prompt_original = self.llm_model.get_input_embeddings()(prompt_original_.to(x_enc.device))
         prompt_embeddings = self.llm_model.get_input_embeddings()(prompt.to(x_enc.device))  # (batch, prompt_token, dim)
+        trend_word_pool = (f"increase decrease upward downward linear exponential drift stable volatile stationary persistent rapid")
+        trend_embedding_ = self.tokenizer(trend_word_pool, return_tensors="pt", padding=True, truncation=True,
+                                          max_length=2048).input_ids
+        trend_embedding = self.llm_model.get_input_embeddings()(trend_embedding_.to(x_enc.device)).squeeze()
+        seasonal_word_pool = (
+            f"cyclical periodic regular oscillation fluctuation rhythm waveform amplitude"
+            f"frequency recurrence variation sine cosine consistent wave peaks troughs pattern season"
+            f"periodicity regularity harmonic crest dip shift swing stable span balanced peak decline rise"
+            f"drop increase decrease phase wave-like duration constant loops levels upward downward time-based"
+            f"high low continuous intervals ongoing oscillate predictability uniform measurable repeatable alternating"
+            f"temporary non-trend synchronized cyclic vibration undulating sequential changes time-driven finite valley"
+            f"cycle-driven measurable timespan consistent balance short-term periodicity oscillating repetitive synchronized"
+            f"short-lived recurrence phase-driven modulation symmetry symmetry-driven")
 
-        source_embeddings = self.mapping_layer(self.word_embeddings.permute(1, 0)).permute(1, 0)
+        seasonal_embedding_ = self.tokenizer(seasonal_word_pool, return_tensors="pt", padding=True, truncation=True,
+                                             max_length=2048).input_ids
+        seasonal_embedding = self.llm_model.get_input_embeddings()(seasonal_embedding_.to(x_enc.device)).squeeze()
+
+        source_embeddings_original = self.mapping_layer(self.word_embeddings.permute(1, 0)).permute(1, 0)
         source_embeddings_trend = self.mapping_layer_trend(self.word_embeddings.permute(1, 0)).permute(1, 0)
         source_embeddings_seasonal = self.mapping_layer_seasonal(self.word_embeddings.permute(1, 0)).permute(1, 0)
-        #prompt for trend and seasonal
-        # prompt_trend = self.tokenizer("Here is the trend of original time series data", return_tensors="pt", padding=True, truncation=True, max_length=2048).input_ids
-        # prompt_trend_embeddings = self.llm_model.get_input_embeddings()(prompt_trend.to(x_enc.device))  # (batch, prompt_token, dim)
-        # prompt_seasonal = self.tokenizer("Here is the seasonal of original time series data", return_tensors="pt", padding=True, truncation=True, max_length=2048).input_ids
-        # prompt_seasonal_embeddings = self.llm_model.get_input_embeddings()(prompt_seasonal.to(x_enc.device))  # (batch, prompt_token, dim)
-        # ##do patch reprogramming for both of seasonal and trend
-        seasonal_out, n_vars = self.patch_embedding(seasonal_init.to(torch.bfloat16))
-        trend_out, n_vars = self.patch_embedding(trend_init.to(torch.bfloat16))
-        residual_out, n_vars = self.patch_embedding(residual_init)
+        x_enc = x_enc.permute(0, 2, 1).contiguous()
+        if self.decomp_level == 1:  # TimeLLM
+            enc_out, n_vars = self.patch_embedding(x_enc)
+            # x_enc_out, n_vars = self.get_patch(x_enc)
+            # enc_out = self.in_layer_trend(x_enc_out)
+            components = {'original': enc_out}
+        elif self.decomp_level == 2:
+            seasonal_init, trend_init = self.decomp(x_enc)
+            trend_out, n_vars = self.patch_embedding(trend_init)
+            seasonal_out, n_vars = self.patch_embedding(seasonal_init)
+            # trend_out = self.in_layer_trend(trend_out)
+            # seasonal_out = self.in_layer_seasonal(seasonal_out)
+            components = {'seasonal_resid': seasonal_out, 'trend': trend_out}
+        elif self.decomp_method == 'STL':
+            trend_init, means_trend, stdev_trend = self.get_norm(seq_trend)
+            seasonal_init, means_seasonal, stdev_seasonal = self.get_norm(seq_seasonal)
+            residual_init, means_seasonal, stdev_seasonal = self.get_norm(seq_resid)
+            seasonal_out, n_vars = self.patch_embedding(seasonal_init.permute(0, 2, 1).contiguous())
+            trend_out, n_vars = self.patch_embedding(trend_init.permute(0, 2, 1).contiguous())
+            residual_out, n_vars = self.patch_embedding(residual_init.permute(0, 2, 1).contiguous())
+            components = {'seasonal': seasonal_out, 'trend': trend_out, 'residual': residual_out}
+        elif self.decomp_method == 'TEMPO':
+            trend_init = self.moving_avg(x_enc)
+            trend_init = self.map_trend(trend_init)
+            seasonal_init = x_enc - trend_init
+            # print(season_local.squeeze().shape)
+            seasonal_init = self.map_season(seasonal_init)
+            residual_init = x_enc - trend_init - seasonal_init
+            trend_out, n_vars = self.patch_embedding(trend_init)
+            seasonal_out, n_vars = self.patch_embedding(seasonal_init)
+            residual_out, n_vars = self.patch_embedding(residual_init)
+            components = {'seasonal': seasonal_out, 'trend': trend_out, 'residual': residual_out}
+        elif self.decomp_method == 'moving_avg':
+            trend_init = self.moving_avg(x_enc)
+            seasonal_init = self.moving_avg(x_enc - trend_init)
+            residual_init = x_enc - trend_init - seasonal_init
+            trend_out, n_vars = self.patch_embedding(trend_init)
+            seasonal_out, n_vars = self.patch_embedding(seasonal_init)
+            residual_out, n_vars = self.patch_embedding(residual_init)
+            components = {'seasonal': seasonal_out, 'trend': trend_out, 'residual': residual_out}
+            ##do patch reprogramming for both of seasonal and trend
+        dec_components = []
+        attn_map_list = []
+        if self.combination == 'late':
+            for k, v in components.items():
+                if k == 'trend':
+                    source_embeddings = trend_embedding
+                    if self.align_text:
+                        components_out, attn_map = self.reprogramming_layer(v, source_embeddings, source_embeddings)
+                        llama_components_out = torch.cat([prompt_embeddings, components_out], dim=1)
+                    else:
+                        llama_components_out = torch.cat([prompt_embeddings,  v], dim=1)
+                elif k == 'seasonal':
+                    source_embeddings = source_embeddings_seasonal
+                    if self.align_text:
+                        components_out, attn_map = self.reprogramming_layer(v, source_embeddings, source_embeddings)
+                        llama_components_out = torch.cat([prompt_embeddings, components_out], dim=1)
+                    else:
+                        llama_components_out = torch.cat([prompt_embeddings, v], dim=1)
+                elif k == 'residual' or k == 'seasonal_resid':
+                    source_embeddings = source_embeddings_original
+                    if self.align_text:
+                        components_out, attn_map = self.reprogramming_layer(v, source_embeddings, source_embeddings)
+                        llama_components_out = torch.cat([prompt_embeddings, components_out], dim=1)
+                    else:
+                        llama_components_out = torch.cat([prompt_embeddings, v], dim=1)
+                elif k == 'original':
+                    source_embeddings = source_embeddings_original
+                    if self.align_text:
+                        components_out, attn_map = self.reprogramming_layer(v, source_embeddings, source_embeddings)
+                        llama_components_out = torch.cat([prompt_embeddings, components_out], dim=1)
+                    else:
+                        llama_components_out = torch.cat([prompt_embeddings, v], dim=1)
+                attn_map_list.append(attn_map)
+                dec_components_out = self.llm_model(inputs_embeds=llama_components_out).last_hidden_state
+                dec_components_out = dec_components_out[:, :, :self.d_ff]
+                dec_components_out = torch.reshape(
+                    dec_components_out, (-1, n_vars, dec_components_out.shape[-2], dec_components_out.shape[-1]))
+                dec_components_out = dec_components_out.permute(0, 1, 3, 2).contiguous()
+                dec_components_out = self.output_projection(dec_components_out[:, :, :, -self.patch_nums:])
+                dec_components_out = dec_components_out.permute(0, 2, 1).contiguous()
+                dec_components.append(dec_components_out)
+            dec_components_out = sum(dec_components)
+        elif self.combination == 'early':
+            llama_components_out = prompt_embeddings
+            for k, v in components.items():
+                if k == 'trend':
+                    source_embeddings = trend_embedding
+                    if self.align_text:
+                        components_out, attn_trend_map = self.reprogramming_layer(v, source_embeddings,
+                                                                                  source_embeddings)
+                        llama_components_out = torch.cat([prompt_embeddings, components_out], dim=1)
+                    else:
+                        llama_components_out = torch.cat([prompt_embeddings, v], dim=1)
+                elif k == 'seasonal':
+                    source_embeddings = source_embeddings_seasonal
+                    if self.align_text:
+                        components_out, attn_map = self.reprogramming_layer(v, source_embeddings, source_embeddings)
+                        llama_components_out = torch.cat([prompt_embeddings, components_out], dim=1)
+                    else:
+                        llama_components_out = torch.cat([prompt_embeddings, v], dim=1)
+                elif k == 'residual' or k == 'seasonal_resid':
+                    source_embeddings = source_embeddings_original
+                    if self.align_text:
+                        components_out, attn_map = self.reprogramming_layer(v, source_embeddings, source_embeddings)
+                        llama_components_out = torch.cat([prompt_embeddings, components_out], dim=1)
+                    else:
+                        llama_components_out = torch.cat([prompt_embeddings, v], dim=1)
+                attn_map_list.append(attn_trend_map)
+            dec_components_out = self.llm_model(inputs_embeds=llama_components_out).last_hidden_state
+            dec_components_out = dec_components_out[:, :, :self.d_ff]
+            dec_components_out = torch.reshape(
+                dec_components_out, (-1, n_vars, dec_components_out.shape[-2], dec_components_out.shape[-1]))
+            dec_components_out = dec_components_out.permute(0, 1, 3, 2).contiguous()
+            dec_components_out = self.output_projection(dec_components_out[:, :, :, -self.patch_nums:])
+            dec_components_out = dec_components_out.permute(0, 2, 1).contiguous()
 
-
-        # seasonal_out = self.reprogramming_layer(seasonal_out, source_embeddings, source_embeddings)
-        # trend_out = self.reprogramming_layer(trend_out, source_embeddings, source_embeddings)
-        seasonal_out = self.reprogramming_layer(seasonal_out, source_embeddings_seasonal, source_embeddings_seasonal)
-        trend_out = self.reprogramming_layer(trend_out, source_embeddings_trend, source_embeddings_trend)
-        residual_out = self.reprogramming_layer(residual_out, source_embeddings, source_embeddings)
-
-        ####
-        llama_seasonal_out = torch.cat([prompt_embeddings, seasonal_out], dim=1)
-        llama_trend_out = torch.cat([prompt_embeddings, trend_out], dim=1)
-        llama_residual_out = torch.cat([prompt_embeddings, residual_out], dim=1)
-
-        dec_seasonal_out = self.llm_model(inputs_embeds=llama_seasonal_out).last_hidden_state
-        dec_trend_out = self.llm_model(inputs_embeds=llama_trend_out).last_hidden_state
-        dec_residual_out = self.llm_model(inputs_embeds=llama_residual_out).last_hidden_state
-
-        dec_seasonal_out = dec_seasonal_out[:, :, :self.d_ff]
-
-        dec_seasonal_out = torch.reshape(
-            dec_seasonal_out, (-1, n_vars, dec_seasonal_out.shape[-2], dec_seasonal_out.shape[-1]))
-        dec_seasonal_out = dec_seasonal_out.permute(0, 1, 3, 2).contiguous()
-
-        dec_seasonal_out = self.output_projection(dec_seasonal_out[:, :, :, -self.patch_nums:])
-        dec_seasonal_out = dec_seasonal_out.permute(0, 2, 1).contiguous()
-
-        # dec_seasonal_out = self.normalize_layers(dec_seasonal_out, 'denorm')
-
-        dec_trend_out = dec_trend_out[:, :, :self.d_ff]
-
-        dec_trend_out = torch.reshape(
-            dec_trend_out, (-1, n_vars, dec_trend_out.shape[-2], dec_trend_out.shape[-1]))
-        dec_trend_out = dec_trend_out.permute(0, 1, 3, 2).contiguous()
-
-        dec_trend_out = self.output_projection(dec_trend_out[:, :, :, -self.patch_nums:])
-        dec_trend_out = dec_trend_out.permute(0, 2, 1).contiguous()
-
-        dec_residual_out = dec_residual_out[:, :, :self.d_ff]
-
-        dec_residual_out = torch.reshape(
-            dec_residual_out, (-1, n_vars, dec_residual_out.shape[-2], dec_residual_out.shape[-1]))
-        dec_residual_out = dec_residual_out.permute(0, 1, 3, 2).contiguous()
-
-        dec_residual_out = self.output_projection(dec_residual_out[:, :, :, -self.patch_nums:])
-        dec_residual_out = dec_residual_out.permute(0, 2, 1).contiguous()
-
-        # dec_trend_out = self.normalize_layers(dec_trend_out, 'denorm')
-        dec_out = dec_trend_out + dec_seasonal_out + dec_residual_out
-
-        dec_out = self.normalize_layers(dec_out, 'denorm')
-
-        return dec_out
+        dec_components_out = self.normalize_layers(dec_components_out, 'denorm')
+        dec_out = dec_components_out
+        if self.align_text:
+            return dec_out, attn_map_list
+        else:
+            return dec_out
 
     def calcute_lags(self, x_enc):
         q_fft = torch.fft.rfft(x_enc.permute(0, 2, 1).contiguous(), dim=-1)
@@ -343,9 +478,9 @@ class ReprogrammingLayer(nn.Module):
     def __init__(self, d_model, n_heads, d_keys=None, d_llm=None, attention_dropout=0.1):
         super(ReprogrammingLayer, self).__init__()
 
-        d_keys = d_keys or (d_model // n_heads)
+        d_keys = d_keys or (d_model // n_heads)  # d_model
 
-        self.query_projection = nn.Linear(d_model, d_keys * n_heads)
+        self.query_projection = nn.Linear(d_model, d_keys * n_heads)  # d_model
         self.key_projection = nn.Linear(d_llm, d_keys * n_heads)
         self.value_projection = nn.Linear(d_llm, d_keys * n_heads)
         self.out_projection = nn.Linear(d_keys * n_heads, d_llm)
@@ -361,11 +496,11 @@ class ReprogrammingLayer(nn.Module):
         source_embedding = self.key_projection(source_embedding).view(S, H, -1)
         value_embedding = self.value_projection(value_embedding).view(S, H, -1)
 
-        out = self.reprogramming(target_embedding, source_embedding, value_embedding)
+        out, attn = self.reprogramming(target_embedding, source_embedding, value_embedding)
 
         out = out.reshape(B, L, -1)
 
-        return self.out_projection(out)
+        return self.out_projection(out), attn
 
     def reprogramming(self, target_embedding, source_embedding, value_embedding):
         B, L, H, E = target_embedding.shape
@@ -377,4 +512,4 @@ class ReprogrammingLayer(nn.Module):
         A = self.dropout(torch.softmax(scale * scores, dim=-1))
         reprogramming_embedding = torch.einsum("bhls,she->blhe", A, value_embedding)
 
-        return reprogramming_embedding
+        return reprogramming_embedding, A
