@@ -14,7 +14,7 @@
 model_name=ST_TimeLLM_1
 d_model=768
 d_ff=768
-train_epochs=1
+train_epochs=50
 seq_len=512
 learning_rate=0.0001
 patience=4
