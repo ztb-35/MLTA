@@ -322,9 +322,9 @@ class Model(nn.Module):
         prompt_original = self.llm_model.get_input_embeddings()(prompt_original_.to(x_enc.device))
         prompt_embeddings = self.llm_model.get_input_embeddings()(prompt.to(x_enc.device))  # (batch, prompt_token, dim)
         trend_word_pool = (f"stable increase decrease linear exponential drift volatile stationary persistent rapid")
-        if self.noise_achors:
+        if self.noise_anchors:
             trend_word_pool = (f"bird chocolate bicycle volcano guitar window ocean pillow basketball rainbow")
-        if self.synonymous_achors:
+        if self.synonymous_anchors:
             trend_word_pool = (f"stable steady constant fixed consistent rise grow increase expand climb decrease decline drop reduce diminish linear exponential drift volatile stationary persistent rapid")
 
         trend_embedding_ = self.tokenizer(trend_word_pool, return_tensors="pt", padding=True, truncation=True,
