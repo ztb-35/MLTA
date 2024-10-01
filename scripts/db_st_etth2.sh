@@ -62,6 +62,7 @@ accelerate launch --multi_gpu --num_processes $num_process run_main.py \
   --train_epochs $train_epochs \
   --percent $percent \
   --align_text \
+  --output_attn_map \
   --decomp_level $decomp_level \
   --decomp_method $decomp_method \
   --combination 'late' \
