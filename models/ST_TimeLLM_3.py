@@ -54,7 +54,7 @@ class Model(nn.Module):
         self.decomp_level = configs.decomp_level
         self.align_text = configs.align_text
         self.combination = configs.combination
-        self.noise_anchors = configs.noise_achors
+        self.noise_anchors = configs.noise_anchors
         self.synonymous_anchors = configs.synonymous_anchors
         # Decomp
         kernel_size = configs.moving_avg
