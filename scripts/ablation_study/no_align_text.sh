@@ -61,10 +61,9 @@ accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
   --lradj 'COS' \
   --train_epochs $train_epochs \
   --percent $percent \
-  --align_text \
   --decomp_level $decomp_level \
   --decomp_method $decomp_method \
-  --combination 'early' \
+  --combination 'late' \
   --model_comment $comment
 
 accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
@@ -99,7 +98,6 @@ accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
   --lradj 'COS' \
   --train_epochs $train_epochs \
   --percent $percent \
-  --align_text \
   --decomp_level $decomp_level \
   --decomp_method $decomp_method \
   --combination 'late' \
@@ -137,7 +135,6 @@ accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
   --lradj 'COS' \
   --train_epochs $train_epochs \
   --percent $percent \
-  --align_text \
   --decomp_level $decomp_level \
   --decomp_method $decomp_method \
   --combination 'late' \
@@ -175,7 +172,6 @@ accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
   --lradj 'COS' \
   --train_epochs $train_epochs \
   --percent $percent \
-  --align_text \
   --decomp_level $decomp_level \
   --decomp_method $decomp_method \
   --combination 'late' \
