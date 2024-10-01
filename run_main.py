@@ -131,6 +131,10 @@ parser.add_argument('--percent', type=int, default=2)
 parser.add_argument('--output_attn_map', action='store_true',
                     help='used for output attention map of patches and prototype tokens')#output_attn_map
 parser.add_argument('--align_text', action='store_true', help='align trext or not')
+parser.add_argument('--align_trend', action='store_true', help='align trend or not')
+parser.add_argument('--align_seasonal', action='store_true', help='align seasonal or not')
+parser.add_argument('--align_residual', action='store_true', help='align residual or not')
+parser.add_argument('--noise_anchors', action='store_true', help='align residual or not') 
 parser.add_argument('--combination', type=str, default='late', help='combine components before go into model or not')
 parser.add_argument('--decomp_level', type=int, default=1, help='decomposition level, '
                                                                 '1 for TimeLLM, 2 for trend and seasonal, 3 for trend, seasonal and residual')
