@@ -14,7 +14,7 @@
 model_name=ST_TimeLLM_2
 d_model=32
 d_ff=128
-train_epochs=50
+train_epochs=1
 seq_len=512
 learning_rate=0.0001
 patience=4
@@ -62,9 +62,12 @@ accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
   --train_epochs $train_epochs \
   --percent $percent \
   --align_text \
+  --align_trend \
+  --align_seasonal \
+  --align_residual \
   --decomp_level $decomp_level \
   --decomp_method $decomp_method \
-  --combination 'early' \
+  --combination 'late' \
   --model_comment $comment
 
 accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
@@ -100,6 +103,9 @@ accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
   --train_epochs $train_epochs \
   --percent $percent \
   --align_text \
+  --align_trend \
+  --align_seasonal \
+  --align_residual \
   --decomp_level $decomp_level \
   --decomp_method $decomp_method \
   --combination 'late' \
@@ -138,6 +144,9 @@ accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
   --train_epochs $train_epochs \
   --percent $percent \
   --align_text \
+  --align_trend \
+  --align_seasonal \
+  --align_residual \
   --decomp_level $decomp_level \
   --decomp_method $decomp_method \
   --combination 'late' \
@@ -176,6 +185,9 @@ accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
   --train_epochs $train_epochs \
   --percent $percent \
   --align_text \
+  --align_trend \
+  --align_seasonal \
+  --align_residual \
   --decomp_level $decomp_level \
   --decomp_method $decomp_method \
   --combination 'late' \

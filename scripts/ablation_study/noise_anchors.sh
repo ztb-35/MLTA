@@ -4,12 +4,13 @@
 #SBATCH -p gpu4
 #SBATCH -n 64#one GPU, n<16
 #SBATCH -A hpc_sunsmic2
-#SBATCH -o /project/tzhao3/TimeLLM_git_clone/Reprogramming-multi-level-time-series-forecasting-by-LLMs/job/alation_study/no_domain_feature_out # File name for stdout
-#SBATCH -e /project/tzhao3/TimeLLM_git_clone/Reprogramming-multi-level-time-series-forecasting-by-LLMs/job/alation_study/no_domain_feature_error # File name for error
+#SBATCH -o /project/tzhao3/TimeLLM_git_clone/Reprogramming-multi-level-time-series-forecasting-by-LLMs/job/alation_study/noise_anchors_out # File name for stdout
+#SBATCH -e /project/tzhao3/TimeLLM_git_clone/Reprogramming-multi-level-time-series-forecasting-by-LLMs/job/alation_study/noise_anchors_error # File name for error
 #SBATCH --mail-type END # Send email when job ends
 #SBATCH --mail-user tzhao3@lsu.edu # Send mail to this address
 #SBATCH --gres=gpu:4
 #job on super mike3
+
 
 model_name=ST_TimeLLM_3
 d_model=32
@@ -65,6 +66,7 @@ accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
   --align_trend \
   --align_seasonal \
   --align_residual \
+  --noise_anchors \
   --decomp_level $decomp_level \
   --decomp_method $decomp_method \
   --combination 'late' \
@@ -106,6 +108,7 @@ accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
   --align_trend \
   --align_seasonal \
   --align_residual \
+  --noise_anchors \
   --decomp_level $decomp_level \
   --decomp_method $decomp_method \
   --combination 'late' \
@@ -147,6 +150,7 @@ accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
   --align_trend \
   --align_seasonal \
   --align_residual \
+  --noise_anchors \
   --decomp_level $decomp_level \
   --decomp_method $decomp_method \
   --combination 'late' \
@@ -188,6 +192,7 @@ accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
   --align_trend \
   --align_seasonal \
   --align_residual \
+  --noise_anchors \
   --decomp_level $decomp_level \
   --decomp_method $decomp_method \
   --combination 'late' \

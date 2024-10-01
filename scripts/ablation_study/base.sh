@@ -63,6 +63,9 @@ accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
   --train_epochs $train_epochs \
   --percent $percent \
   --align_text \
+  --align_trend \
+  --align_seasonal \
+  --align_residual \
   --decomp_level $decomp_level \
   --decomp_method $decomp_method \
   --combination 'late' \
@@ -101,6 +104,9 @@ accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
   --train_epochs $train_epochs \
   --percent $percent \
   --align_text \
+  --align_trend \
+  --align_seasonal \
+  --align_residual \
   --decomp_level $decomp_level \
   --decomp_method $decomp_method \
   --combination 'late' \
@@ -139,6 +145,9 @@ accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
   --train_epochs $train_epochs \
   --percent $percent \
   --align_text \
+  --align_trend \
+  --align_seasonal \
+  --align_residual \
   --decomp_level $decomp_level \
   --decomp_method $decomp_method \
   --combination 'late' \
@@ -177,6 +186,9 @@ accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
   --train_epochs $train_epochs \
   --percent $percent \
   --align_text \
+  --align_trend \
+  --align_seasonal \
+  --align_residual \
   --decomp_level $decomp_level \
   --decomp_method $decomp_method \
   --combination 'late' \

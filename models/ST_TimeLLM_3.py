@@ -54,6 +54,8 @@ class Model(nn.Module):
         self.decomp_level = configs.decomp_level
         self.align_text = configs.align_text
         self.combination = configs.combination
+        self.noise_anchors = configs.noise_achors
+        self.synonymous_anchors = configs.synonymous_anchors
         # Decomp
         kernel_size = configs.moving_avg
         self.decomp = series_decomp(kernel_size)
@@ -319,9 +321,12 @@ class Model(nn.Module):
         prompt_residual = self.llm_model.get_input_embeddings()(prompt_residual_.to(x_enc.device))
         prompt_original = self.llm_model.get_input_embeddings()(prompt_original_.to(x_enc.device))
         prompt_embeddings = self.llm_model.get_input_embeddings()(prompt.to(x_enc.device))  # (batch, prompt_token, dim)
-        trend_word_pool = (f"increase decrease upward downward linear exponential drift stable volatile stationary persistent rapid")
-        trend_synonymous_word_pool = (f"increase rise grow expand climb decrease decline drop reduce diminish stable steady constant unchanging consistent")
-        trend_noise_word_pool = (f"elephant chocolate bicycle volcano guitar window ocean pillow basketball rainbow")
+        trend_word_pool = (f"stable increase decrease linear exponential drift volatile stationary persistent rapid")
+        if self.noise_achors:
+            trend_word_pool = (f"bird chocolate bicycle volcano guitar window ocean pillow basketball rainbow")
+        if self.synonymous_achors:
+            trend_word_pool = (f"stable steady constant fixed consistent rise grow increase expand climb decrease decline drop reduce diminish linear exponential drift volatile stationary persistent rapid")
+
         trend_embedding_ = self.tokenizer(trend_word_pool, return_tensors="pt", padding=True, truncation=True,
                                           max_length=2048).input_ids
         trend_embedding = self.llm_model.get_input_embeddings()(trend_embedding_.to(x_enc.device)).squeeze()

@@ -53,6 +53,9 @@ class Model(nn.Module):
         self.decomp_method = configs.decomp_method
         self.decomp_level = configs.decomp_level
         self.align_text = configs.align_text
+        self.align_trend = configs.align_trend
+        self.align_seasonal = configs.align_seasonal
+        self.align_residual = configs.align_residual
         self.combination = configs.combination
         # Decomp
         kernel_size = configs.moving_avg
@@ -387,27 +390,30 @@ class Model(nn.Module):
             for k, v in components.items():
                 if k == 'trend':
                     source_embeddings = trend_embedding
-                    if self.align_text:
+                    if self.align_text and self.align_trend :
                         components_out, attn_map = self.reprogramming_layer(v, source_embeddings, source_embeddings)
                         llama_components_out = torch.cat([prompt_embeddings, prompt_trend, components_out], dim=1)
                         attn_map_list.append(attn_map)
                     else:
+                        v = self.components_embed(v)
                         llama_components_out = torch.cat([prompt_embeddings, prompt_trend, v], dim=1)
                 elif k == 'seasonal':
                     source_embeddings = source_embeddings_seasonal
-                    if self.align_text:
+                    if self.align_text and self.align_seasonal:
                         components_out, attn_map = self.reprogramming_layer(v, source_embeddings, source_embeddings)
                         llama_components_out = torch.cat([prompt_embeddings, prompt_seasonal, components_out], dim=1)
                         attn_map_list.append(attn_map)
                     else:
+                        v = self.components_embed(v)
                         llama_components_out = torch.cat([prompt_embeddings, prompt_seasonal, v], dim=1)
                 elif k == 'residual' or k == 'seasonal_resid':
                     source_embeddings = source_embeddings_original
-                    if self.align_text:
+                    if self.align_text and self.align_residual:
                         components_out, attn_map = self.reprogramming_layer(v, source_embeddings, source_embeddings)
                         llama_components_out = torch.cat([prompt_embeddings, prompt_residual, components_out], dim=1)
                         attn_map_list.append(attn_map)
                     else:
+                        v = self.components_embed(v)
                         llama_components_out = torch.cat([prompt_embeddings, prompt_residual, v], dim=1)
                 elif k == 'original':
                     source_embeddings = source_embeddings_original
@@ -416,6 +422,7 @@ class Model(nn.Module):
                         llama_components_out = torch.cat([prompt_embeddings, prompt_original, components_out], dim=1)
                         attn_map_list.append(attn_map)
                     else:
+                        v = self.components_embed(v)
                         llama_components_out = torch.cat([prompt_embeddings, prompt_original, v], dim=1)
                 dec_components_out = self.llm_model(inputs_embeds=llama_components_out).last_hidden_state
                 dec_components_out = dec_components_out[:, :, :self.d_ff]
