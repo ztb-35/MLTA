@@ -154,23 +154,11 @@ accelerator.print(args)
 if not args.output_attn_map:
     for ii in range(args.itr):
         # setting record of experiments
-        setting = '{}_{}_{}_{}_ft{}_sl{}_ll{}_pl{}_dm{}_nh{}_el{}_dl{}_df{}_fc{}_eb{}_{}'.format(
+        setting = '{}_{}_{}_{}'.format(
             args.task_name,
             args.model_id,
             args.model,
-            args.data,
-            args.features,
-            args.seq_len,
-            args.label_len,
-            args.pred_len,
-            args.d_model,
-            args.n_heads,
-            args.e_layers,
-            args.d_layers,
-            args.d_ff,
-            args.factor,
-            args.embed,
-            args.des)
+            args.data)
 
 
         # train_data, train_loader = data_provider(args, 'train')
@@ -362,23 +350,11 @@ if not args.output_attn_map:
 elif args.output_attn_map:
     for ii in range(args.itr):
         # setting record of experiments
-        setting = '{}_{}_{}_{}_ft{}_sl{}_ll{}_pl{}_dm{}_nh{}_el{}_dl{}_df{}_fc{}_eb{}_{}'.format(
+        setting = '{}_{}_{}_{}'.format(
             args.task_name,
             args.model_id,
             args.model,
-            args.data,
-            args.features,
-            args.seq_len,
-            args.label_len,
-            args.pred_len,
-            args.d_model,
-            args.n_heads,
-            args.e_layers,
-            args.d_layers,
-            args.d_ff,
-            args.factor,
-            args.embed,
-            args.des)
+            args.data)
 
 
         # train_data, train_loader = data_provider(args, 'train')
