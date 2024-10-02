@@ -4,16 +4,16 @@
 #SBATCH -p gpu
 #SBATCH -n 48#one GPU, n<16
 #SBATCH -A hpc_sundeepby4
-#SBATCH -o /work/tzhao3/TimeLLM/Reprogramming-multi-level-time-series-forecasting-by-LLMs/job/alation_study/no_domain_feature_out # File name for stdout
-#SBATCH -e /work/tzhao3/TimeLLM/Reprogramming-multi-level-time-series-forecasting-by-LLMs/job/alation_study/no_domain_feature_error # File name for error
+#SBATCH -o /work/tzhao3/TimeLLM/Reprogramming-multi-level-time-series-forecasting-by-LLMs/job/alation_study/no_trend_align_out # File name for stdout
+#SBATCH -e /work/tzhao3/TimeLLM/Reprogramming-multi-level-time-series-forecasting-by-LLMs/job/alation_study/no_trend_align_error # File name for error
 #SBATCH --mail-type END # Send email when job ends
 #SBATCH --mail-user tzhao3@lsu.edu # Send mail to this address
 #SBATCH --gres=gpu:2
 #job on super mike3
 
-model_name=ST_TimeLLM_3
-d_model=32
-d_ff=128
+model_name=ST_TimeLLM_1
+d_model=768
+d_ff=768
 train_epochs=50
 seq_len=512
 learning_rate=0.0001
@@ -62,7 +62,6 @@ accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
   --train_epochs $train_epochs \
   --percent $percent \
   --align_text \
-  --align_trend \
   --align_seasonal \
   --align_residual \
   --decomp_level $decomp_level \
@@ -103,7 +102,6 @@ accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
   --train_epochs $train_epochs \
   --percent $percent \
   --align_text \
-  --align_trend \
   --align_seasonal \
   --align_residual \
   --decomp_level $decomp_level \
@@ -144,7 +142,6 @@ accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
 #   --train_epochs $train_epochs \
 #   --percent $percent \
 #   --align_text \
-#   --align_trend \
 #   --align_seasonal \
 #   --align_residual \
 #   --decomp_level $decomp_level \
@@ -185,7 +182,6 @@ accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
 #   --train_epochs $train_epochs \
 #   --percent $percent \
 #   --align_text \
-#   --align_trend \
 #   --align_seasonal \
 #   --align_residual \
 #   --decomp_level $decomp_level \

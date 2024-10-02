@@ -8,7 +8,7 @@
 #SBATCH -e /work/tzhao3/TimeLLM/Reprogramming-multi-level-time-series-forecasting-by-LLMs/job/alation_study/align_residual_only_error # File name for error
 #SBATCH --mail-type END # Send email when job ends
 #SBATCH --mail-user tzhao3@lsu.edu # Send mail to this address
-#SBATCH --gres=gpu:4
+#SBATCH --gres=gpu:2
 #job on super mike3
 
 

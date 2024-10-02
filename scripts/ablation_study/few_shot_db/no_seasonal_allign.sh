@@ -11,7 +11,8 @@
 #SBATCH --gres=gpu:2
 #job on super mike3
 
-model_name=ST_TimeLLM_3
+
+model_name=ST_TimeLLM_1
 d_model=32
 d_ff=128
 train_epochs=50
@@ -63,7 +64,6 @@ accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
   --percent $percent \
   --align_text \
   --align_trend \
-  --align_seasonal \
   --align_residual \
   --decomp_level $decomp_level \
   --decomp_method $decomp_method \
@@ -104,7 +104,6 @@ accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
   --percent $percent \
   --align_text \
   --align_trend \
-  --align_seasonal \
   --align_residual \
   --decomp_level $decomp_level \
   --decomp_method $decomp_method \
@@ -145,7 +144,6 @@ accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
 #   --percent $percent \
 #   --align_text \
 #   --align_trend \
-#   --align_seasonal \
 #   --align_residual \
 #   --decomp_level $decomp_level \
 #   --decomp_method $decomp_method \
@@ -186,7 +184,6 @@ accelerate launch --multi_gpu --num_processes $num_process run_main_1.py \
 #   --percent $percent \
 #   --align_text \
 #   --align_trend \
-#   --align_seasonal \
 #   --align_residual \
 #   --decomp_level $decomp_level \
 #   --decomp_method $decomp_method \
