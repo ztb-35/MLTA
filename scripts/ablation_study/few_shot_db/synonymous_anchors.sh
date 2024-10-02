@@ -1,14 +1,14 @@
 #!/bin/bash
 #SBATCH -N 1
 #SBATCH -t 72:00:00
-#SBATCH -p gpu4
+#SBATCH -p gpu
 #SBATCH -n 48#one GPU, n<16
 #SBATCH -A hpc_sundeepby4
 #SBATCH -o /work/tzhao3/TimeLLM/Reprogramming-multi-level-time-series-forecasting-by-LLMs/job/alation_study/synonymous_anchors_out # File name for stdout
 #SBATCH -e /work/tzhao3/TimeLLM/Reprogramming-multi-level-time-series-forecasting-by-LLMs/job/alation_study/synonymous_anchors_error # File name for error
 #SBATCH --mail-type END # Send email when job ends
 #SBATCH --mail-user tzhao3@lsu.edu # Send mail to this address
-#SBATCH --gres=gpu:4
+#SBATCH --gres=gpu:2
 #job on super mike3
 
 
