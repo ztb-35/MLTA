@@ -4,16 +4,6 @@
   <h2><b> (DASFAA2025) Enhancing Time Series Forecasting via Multi-Level Text Alignment with LLMs </b></h2>
 </div>
 
-<div align="center">
-
-![](https://img.shields.io/github/last-commit/KimMeen/Time-LLM?color=green)
-![](https://img.shields.io/github/stars/KimMeen/Time-LLM?color=yellow)
-![](https://img.shields.io/github/forks/KimMeen/Time-LLM?color=lightblue)
-![](https://img.shields.io/badge/PRs-Welcome-green)
-
-</div>
-
-<div align="center">
 
 
 </div>
