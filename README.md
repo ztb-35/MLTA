@@ -10,7 +10,7 @@
 
 <p align="center">
 
-<img src="./figures/overview.png" width="70">
+<img src="./figures/overview.png">
 
 </p>
 
