@@ -66,7 +66,7 @@ You can access the well pre-processed datasets from [[Google Drive]](https://dri
 
 ## Quick Demos
 1. Download datasets and place them under `./dataset`
-2. Tune the model. We provide five experiment scripts for demonstration purpose under the folder `./scripts`. For example, you can evaluate on ETT datasets by:
+2. Tune the model. We provide one experiment script for demonstration purpose under the folder `./scripts`. For example, you can evaluate on ETT datasets by:
 
 ```bash
 bash ./scripts/MLTA_ETTh1.sh 
