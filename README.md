@@ -77,6 +77,9 @@ bash ./scripts/MLTA_ETTh1.sh
 
 Please refer to ```run_main.py```, ```run_m4.py``` and ```run_pretrain.py``` for the detailed description of each hyperparameter.
 
+## Contact
+If you have any questions or suggestions, feel free to contact:
+tzhao3@lsu.edu
 
 ## Acknowledgement
 Our implementation adapts [Time-Series-Library](https://github.com/thuml/Time-Series-Library) and [TimeLLM](https://github.com/KimMeen/Time-LLM) as the code base and have extensively modified it to our purposes. We thank the authors for sharing their implementations and related resources.
